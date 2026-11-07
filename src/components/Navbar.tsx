@@ -42,7 +42,7 @@ export default function Navbar() {
             <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-cyan-400/50 shadow-cyan-glow group-hover:border-gold-400 transition-colors">
               <Image
                 src="/images/sarang-avatar.jpg"
-                alt="SHARANG AI"
+                alt="SARANG AI"
                 fill
                 className="object-cover"
                 sizes="36px"
@@ -50,7 +50,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-black tracking-wider text-white group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
-                SHARANG <span className="text-cyan-400 text-sm font-bold bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/30">AI</span>
+                SARANG <span className="text-cyan-400 text-sm font-bold bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/30">AI</span>
               </span>
               <span className="text-[10px] text-slate-400 tracking-wider uppercase font-medium">
                 Insurance Intelligence

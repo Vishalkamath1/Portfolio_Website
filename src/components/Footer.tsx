@@ -18,13 +18,13 @@ export default function Footer() {
               <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-cyan-400/40 shadow-cyan-glow">
                 <Image
                   src="/images/sarang-avatar.jpg"
-                  alt="SHARANG AI"
+                  alt="SARANG AI"
                   fill
                   className="object-cover"
                 />
               </div>
               <span className="text-xl font-black tracking-wider text-white">
-                SHARANG <span className="text-cyan-400 text-sm font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">AI</span>
+                SARANG <span className="text-cyan-400 text-sm font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">AI</span>
               </span>
             </div>
             <p className="text-sm text-slate-300 max-w-md leading-relaxed">
@@ -100,10 +100,10 @@ export default function Footer() {
         {/* Regulatory & Domain Disclaimer */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
           <p className="max-w-3xl text-center md:text-left">
-            <span className="text-slate-400 font-semibold">Underwriting Notice:</span> Demonstrations and SHARANG AI responses are provided strictly for educational and portfolio demonstration purposes. No binding underwriting decisions or quote commitments are rendered.
+            <span className="text-slate-400 font-semibold">Underwriting Notice:</span> Demonstrations and SARANG AI responses are provided strictly for educational and portfolio demonstration purposes. No binding underwriting decisions or quote commitments are rendered.
           </p>
           <p className="shrink-0">
-            © {new Date().getFullYear()} {OWNER_PROFILE.name} · SHARANG AI
+            © {new Date().getFullYear()} {OWNER_PROFILE.name} · SARANG AI
           </p>
         </div>
       </div>

@@ -127,8 +127,8 @@ export default function ContactSection() {
               </p>
 
               <a
-                href="/assets/Hiranyanabh_Insurance_AI_Resume.pdf"
-                download="Hiranyanabh_Insurance_AI_Resume.pdf"
+                href="/assets/Vishal Kamath_Insurance_AI_Resume.pdf"
+                download="Vishal Kamath_Insurance_AI_Resume.pdf"
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-navy-950 font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-cyan-glow hover:from-cyan-400 hover:to-blue-500 transition-all active:scale-95"
               >
                 <Download className="w-4 h-4" />

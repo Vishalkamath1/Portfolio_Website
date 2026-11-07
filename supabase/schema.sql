@@ -1,6 +1,6 @@
 -- ==============================================================================
--- SHARANG AI: Supabase Database Schema & RLS Setup
--- Reference: SHARANG_AI_Master_Build_Prompt.pdf
+-- SARANG AI: Supabase Database Schema & RLS Setup
+-- Reference: SARANG_AI_Master_Build_Prompt.pdf
 -- ==============================================================================
 
 -- 1. Create Projects Table
@@ -159,11 +159,11 @@ INSERT INTO public.projects (
     null
 ),
 (
-    'SHARANG Underwriting Knowledge Agent',
+    'SARANG Underwriting Knowledge Agent',
     'Centralized conversational copilot for group health insurance rules, guidelines, and terms.',
     'GenAI Tools',
     'Junior underwriting executives and sales teams spend valuable time asking senior underwriters routine questions about standard limits, waiting periods, and deductible rules.',
-    'A dedicated AI agent (SHARANG) steeped in insurance underwriting guidelines capable of answering queries, clarifying GPA tables of benefits, and citing standard practice.',
+    'A dedicated AI agent (SARANG) steeped in insurance underwriting guidelines capable of answering queries, clarifying GPA tables of benefits, and citing standard practice.',
     ARRAY['Gemini 1.5/2.0 API', 'System Conditioning', 'React', 'Tailwind CSS'],
     'Accelerates onboarding of new underwriters and frees senior capacity for complex corporate risk pricing.',
     'Completed',

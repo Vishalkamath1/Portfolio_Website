@@ -4,8 +4,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://sharang-ai.com'),
-  title: 'SHARANG AI — Insurance Expertise & Artificial Intelligence Portfolio',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://sarang-ai.com'),
+  title: 'SARANG AI — Insurance Expertise & Artificial Intelligence Portfolio',
   description: 'Bridging 7.4 years of frontline insurance expertise (Life Insurance & GMC/GPA Underwriting) with applied AI automation and advanced Excel modelling.',
   keywords: [
     'Insurance Underwriting',
@@ -14,22 +14,22 @@ export const metadata: Metadata = {
     'Group Health Insurance',
     'AI in Insurance',
     'Insurance Process Automation',
-    'SHARANG AI',
+    'SARANG AI',
     'Incurred Claims Ratio',
     'Burn Cost Modelling'
   ],
-  authors: [{ name: 'Hiranyanabh' }],
+  authors: [{ name: 'Vishal Kamath' }],
   openGraph: {
-    title: 'SHARANG AI — Insurance & Artificial Intelligence Portfolio',
+    title: 'SARANG AI — Insurance & Artificial Intelligence Portfolio',
     description: 'Bridging Insurance Expertise with Artificial Intelligence. Smart Insights. Better Decisions. A Safer Tomorrow.',
-    url: 'https://sharang-ai.com',
-    siteName: 'SHARANG AI',
+    url: 'https://sarang-ai.com',
+    siteName: 'SARANG AI',
     images: [
       {
         url: '/images/sarang-archer.jpg',
         width: 1200,
         height: 630,
-        alt: 'SHARANG AI Futuristic Archer Guardian'
+        alt: 'SARANG AI Futuristic Archer Guardian'
       }
     ],
     locale: 'en_US',

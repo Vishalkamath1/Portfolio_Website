@@ -1,8 +1,8 @@
-# SHARANG AI — Master Development Progress Checklist
+# SARANG AI — Master Development Progress Checklist
 
-> Reference Document: `SHARANG_AI_Master_Build_Prompt.pdf`
-> Project: SHARANG AI - Professional Insurance & Artificial Intelligence Portfolio Website
-> Brand: **SHARANG AI** | Tagline: *Bridging Insurance Expertise with Artificial Intelligence.* | Slogan: *Experience Explore Engage.*
+> Reference Document: `SARANG_AI_Master_Build_Prompt.pdf`
+> Project: SARANG AI - Professional Insurance & Artificial Intelligence Portfolio Website
+> Brand: **SARANG AI** | Tagline: *Bridging Insurance Expertise with Artificial Intelligence.* | Slogan: *Experience Explore Engage.*
 
 ---
 
@@ -28,7 +28,7 @@
 - [x] Section 2: About Me (7.4 yrs insurance career: 2.9y Life + 4.5y GMC/GPA underwriting, transition to AI)
 - [x] Section 3: Expertise (7 professional cards: GMC, GPA, Operations, Advanced Excel, AI Tools/Prompt Engineering, Process Automation, AI in Insurance)
 - [x] Section 4: AI Projects Library (Searchable, filterable by category, detailed project modal)
-- [x] Section 5: SHARANG AI Central Agent (Futuristic Archer Guardian identity, interactive console, specialist modes)
+- [x] Section 5: SARANG AI Central Agent (Futuristic Archer Guardian identity, interactive console, specialist modes)
 - [x] Section 6: Education & Certifications (Insurance credentials & AI learning journey cards)
 - [x] Section 7: Resume & Contact (Validated contact form, resume download, professional closing)
 - [x] Responsive navigation header with active section highlighting
@@ -49,7 +49,7 @@
 - [x] Seed data loader with initial GMC/GPA underwriting & AI automation showcase projects
 - [x] Dynamic project library synchronization between public portfolio and Admin CMS
 
-## 5. SHARANG AI CENTRAL AGENT & LLM INTEGRATION (PHASE 5)
+## 5. SARANG AI CENTRAL AGENT & LLM INTEGRATION (PHASE 5)
 - [x] Server-side Route Handler (`/api/chat`) isolating LLM credentials from frontend
 - [x] Archer Guardian Persona system prompt with deep insurance domain knowledge (GMC, GPA, Underwriting, Excel, AI)
 - [x] Specialist mode selector (Underwriting, Claims, Insurance Knowledge, Analytics, Automation)
@@ -60,7 +60,7 @@
 
 ## 6. QUALITY, SECURITY & REFINEMENTS (PHASE 6 & 7)
 - [x] Contact form submission handling, honeypot spam protection, and validation
-- [x] Professional downloadable resume asset & link (`/assets/Hiranyanabh_Insurance_AI_Resume.pdf`)
+- [x] Professional downloadable resume asset & link (`/assets/Vishal Kamath_Insurance_AI_Resume.pdf`)
 - [x] SEO metadata, OpenGraph tags, and social card preview
 - [x] Accessibility, keyboard navigation, and high-contrast dark theme verified
 - [x] Cross-device responsiveness verified (Mobile hamburger menu, Tablet grids, Desktop layout)

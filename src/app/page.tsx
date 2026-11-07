@@ -22,7 +22,7 @@ export default function HomePage() {
       {/* SECTION 4 - AI PROJECTS */}
       <ProjectsSection />
 
-      {/* SECTION 5 - SHARANG AI CENTRAL AGENT */}
+      {/* SECTION 5 - SARANG AI CENTRAL AGENT */}
       <AgentSection />
 
       {/* SECTION 6 - EDUCATION & CERTIFICATIONS */}

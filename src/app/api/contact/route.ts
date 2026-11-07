@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Your inquiry has been successfully received by Hiranyanabh.'
+      message: 'Your inquiry has been successfully received by Vishal Kamath.'
     });
   } catch (err: any) {
     console.error('Contact API error:', err);

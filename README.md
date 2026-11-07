@@ -1,8 +1,8 @@
-# SHARANG AI — Insurance & Artificial Intelligence Portfolio
+# SARANG AI — Insurance & Artificial Intelligence Portfolio
 
 > **Tagline**: Bridging Insurance Expertise with Artificial Intelligence.  
 > **Slogan**: Experience · Explore · Engage  
-> **Master Prompt Reference**: `SHARANG_AI_Master_Build_Prompt.pdf`
+> **Master Prompt Reference**: `SARANG_AI_Master_Build_Prompt.pdf`
 
 A high-performance, full-stack portfolio website showcasing **7.4 years of insurance domain expertise** (Life Insurance, Group Medical Insurance / GMC Underwriting, Group Personal Accident / GPA Underwriting, Advanced Excel) combined with cutting-edge **AI automation and analytics**.
 
@@ -10,13 +10,13 @@ A high-performance, full-stack portfolio website showcasing **7.4 years of insur
 
 ## Architecture Overview
 
-SHARANG AI is architected with a strict 7-section single-page experience, a single integrated central AI assistant, and a private owner administration dashboard:
+SARANG AI is architected with a strict 7-section single-page experience, a single integrated central AI assistant, and a private owner administration dashboard:
 
 1. **Hero Section** — Futuristic Archer Guardian branding, impactful headline, dual CTA buttons.
 2. **About Me** — 7.4-year professional insurance journey, GMC & GPA underwriting focus, and transition into AI solutions.
 3. **Expertise** — 7 authentic domain capability cards (GMC, GPA, Operations, Advanced Excel, AI Prompt Engineering, Process Automation, AI in Insurance).
 4. **AI Projects Library** — Dynamic, filterable, searchable showcase with category selectors and project deep-dive modals.
-5. **SHARANG AI Central Agent** — Integrated futuristic Archer Guardian assistant powered by server-side Gemini API with specialist modes (Underwriting, Claims, Analytics, Automation, Knowledge) and resilient demo mode.
+5. **SARANG AI Central Agent** — Integrated futuristic Archer Guardian assistant powered by server-side Gemini API with specialist modes (Underwriting, Claims, Analytics, Automation, Knowledge) and resilient demo mode.
 6. **Education & Certifications** — Insurance credentials and continuous AI learning milestones.
 7. **Resume & Contact** — Downloadable resume, validated contact form, and direct recruiter links.
 8. **Private Owner Admin Dashboard (`/admin`)** — Secured portal to manage AI projects, edit content, and review inquiries.
@@ -59,7 +59,7 @@ cp .env.example .env.local
 | `GEMINI_API_KEY` | Google Gemini API Key | Live AI Assistant |
 | `ADMIN_SECRET_KEY` | Fallback Local Admin Passkey | Admin Access fallback |
 
-*Note: If `GEMINI_API_KEY` or Supabase keys are not set, SHARANG AI automatically falls back to an intelligent demonstration mode with pre-seeded projects and domain-aware responses.*
+*Note: If `GEMINI_API_KEY` or Supabase keys are not set, SARANG AI automatically falls back to an intelligent demonstration mode with pre-seeded projects and domain-aware responses.*
 
 ### 4. Running the Development Server
 ```bash
@@ -75,7 +75,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    ```bash
    git init
    git add .
-   git commit -m "feat: complete SHARANG AI full-stack portfolio"
+   git commit -m "feat: complete SARANG AI full-stack portfolio"
    git branch -M main
    git remote add origin https://github.com/<your-username>/sarang-ai.git
    git push -u origin main

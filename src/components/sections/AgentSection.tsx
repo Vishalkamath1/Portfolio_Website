@@ -121,7 +121,7 @@ Explore all projects in Section 4 above!`;
 
     return `Thank you for asking about **"${query}"** in **${mode.toUpperCase()}** mode. 
 
-As the **SHARANG AI Guardian**, I draw upon ${OWNER_PROFILE.name}'s **7.4 years of insurance experience** (4.5 years in GMC/GPA underwriting and 2.9 years in Life advisory) alongside practical AI automation workflows. 
+As the **SARANG AI Guardian**, I draw upon ${OWNER_PROFILE.name}'s **7.4 years of insurance experience** (4.5 years in GMC/GPA underwriting and 2.9 years in Life advisory) alongside practical AI automation workflows. 
 
 Feel free to ask more specific questions regarding:
 - GMC/GPA policy wordings, exclusions, or IRDAI guidelines
@@ -220,7 +220,7 @@ Feel free to ask more specific questions regarding:
             <span>Section 5 · Central Assistant</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Meet SHARANG AI — Futuristic Archer Guardian
+            Meet SARANG AI — Futuristic Archer Guardian
           </h2>
           <p className="mt-4 text-base text-slate-300 leading-relaxed">
             The single central intelligence of this portfolio. Not a disconnected generic bot, but a domain-steeped underwriter assistant carrying {OWNER_PROFILE.name}’s 7.4 years of insurance experience.
@@ -255,7 +255,7 @@ Feel free to ask more specific questions regarding:
                     Archer Guardian of Risk & Protection
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    Bearing the Ornate Sharang Dhanush & Golden Quiver
+                    Bearing the Ornate Sarang Dhanush & Golden Quiver
                   </p>
                 </div>
               </div>
@@ -309,7 +309,7 @@ Feel free to ask more specific questions regarding:
               <div className="mt-4 p-3 rounded-lg bg-amber-950/40 border border-amber-500/30 flex items-start gap-2.5 text-[11px] text-amber-300/90 leading-relaxed">
                 <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Informational Notice:</strong> SHARANG AI provides underwriting guidance and portfolio insights. It does not make binding underwriting or policy coverage commitments.
+                  <strong>Informational Notice:</strong> SARANG AI provides underwriting guidance and portfolio insights. It does not make binding underwriting or policy coverage commitments.
                 </span>
               </div>
             </div>
@@ -333,7 +333,7 @@ Feel free to ask more specific questions regarding:
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white flex items-center gap-2">
-                      <span>SHARANG AI Console</span>
+                      <span>SARANG AI Console</span>
                       <span className="text-[10px] text-cyan-300 bg-cyan-950 border border-cyan-500/30 px-1.5 py-0.2 rounded font-semibold capitalize">
                         {activeMode} Mode
                       </span>

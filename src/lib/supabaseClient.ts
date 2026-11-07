@@ -18,9 +18,9 @@ export const supabase = isSupabaseConfigured
   : null;
 
 // Local storage key for fallback persistence
-const LOCAL_PROJECTS_KEY = 'sharang_ai_local_projects';
-const LOCAL_MESSAGES_KEY = 'sharang_ai_local_messages';
-const LOCAL_PROFILE_KEY = 'sharang_ai_local_profile';
+const LOCAL_PROJECTS_KEY = 'sarang_ai_local_projects';
+const LOCAL_MESSAGES_KEY = 'sarang_ai_local_messages';
+const LOCAL_PROFILE_KEY = 'sarang_ai_local_profile';
 
 // ==============================================================================
 // Projects Data Access Layer
@@ -218,7 +218,7 @@ export async function fetchContactMessages(): Promise<ContactMessageRecord[]> {
       email: 'priya@apexbrokers.com',
       company: 'Apex Corporate Insurance Brokers',
       interest: 'GMC & GPA Underwriting',
-      message: 'Hello Hiranyanabh, we reviewed your burn cost modeling prototype and would love to discuss a consulting engagement for our group underwriting team.',
+      message: 'Hello Vishal Kamath, we reviewed your burn cost modeling prototype and would love to discuss a consulting engagement for our group underwriting team.',
       read: false,
       createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
     },

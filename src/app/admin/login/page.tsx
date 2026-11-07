@@ -29,8 +29,8 @@ export default function AdminLoginPage() {
           });
 
           if (!authError && data?.session) {
-            sessionStorage.setItem('sharang_admin_auth', 'true');
-            sessionStorage.setItem('sharang_admin_email', email);
+            sessionStorage.setItem('sarang_admin_auth', 'true');
+            sessionStorage.setItem('sarang_admin_email', email);
             router.push('/admin');
             return;
           }
@@ -41,9 +41,9 @@ export default function AdminLoginPage() {
 
       // 2. Direct Admin Password check (Fallback or quick access)
       const validPass = 'admin123';
-      if (password === validPass || password === 'sharang2026') {
-        sessionStorage.setItem('sharang_admin_auth', 'true');
-        sessionStorage.setItem('sharang_admin_email', email || 'hiranyanabh@sharang-ai.com');
+      if (password === validPass || password === 'sarang2026') {
+        sessionStorage.setItem('sarang_admin_auth', 'true');
+        sessionStorage.setItem('sarang_admin_email', email || 'Vishal Kamath');
         router.push('/admin');
         return;
       }
@@ -67,14 +67,14 @@ export default function AdminLoginPage() {
           <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400 shadow-cyan-glow bg-navy-900 group-hover:border-gold-400 transition-colors">
             <Image
               src="/images/sarang-avatar.jpg"
-              alt="SHARANG AI"
+              alt="SARANG AI"
               fill
               className="object-cover"
             />
           </div>
           <div className="text-left">
             <div className="text-xl font-black tracking-wider text-white">
-              SHARANG <span className="text-cyan-400 text-xs px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/30">AI</span>
+              SARANG <span className="text-cyan-400 text-xs px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/30">AI</span>
             </div>
             <div className="text-[10px] text-slate-400 uppercase tracking-widest">
               Owner Administration
@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
                 <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
-                  placeholder="admin@sharang-ai.com"
+                  placeholder="admin@sarang-ai.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-navy-950 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors"

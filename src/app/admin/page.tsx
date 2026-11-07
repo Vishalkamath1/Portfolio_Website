@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
 
   // Check authentication
   useEffect(() => {
-    const auth = sessionStorage.getItem('sharang_admin_auth');
+    const auth = sessionStorage.getItem('sarang_admin_auth');
     if (auth === 'true') {
       setIsAuthenticated(true);
     } else {
@@ -114,8 +114,8 @@ export default function AdminDashboardPage() {
   }, [isAuthenticated]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('sharang_admin_auth');
-    sessionStorage.removeItem('sharang_admin_email');
+    sessionStorage.removeItem('sarang_admin_auth');
+    sessionStorage.removeItem('sarang_admin_email');
     router.push('/admin/login');
   };
 
@@ -232,14 +232,14 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
             <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-cyan-400 shadow-cyan-glow bg-navy-900">
               <Image
                 src="/images/sarang-avatar.jpg"
-                alt="SHARANG AI"
+                alt="SARANG AI"
                 fill
                 className="object-cover"
               />
             </div>
             <div>
               <div className="text-base font-black text-white flex items-center gap-2">
-                <span>SHARANG AI</span>
+                <span>SARANG AI</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gold-400 bg-gold-950/80 border border-gold-500/30 px-1.5 py-0.2 rounded">
                   Owner Dashboard
                 </span>

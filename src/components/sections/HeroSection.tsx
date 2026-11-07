@@ -112,7 +112,7 @@ export default function HeroSection() {
                 <div className="relative aspect-square w-full bg-navy-900">
                   <Image
                     src="/images/sarang-archer.jpg"
-                    alt="SHARANG AI — Futuristic Archer Guardian"
+                    alt="SARANG AI — Futuristic Archer Guardian"
                     fill
                     priority
                     className="object-cover group-hover:scale-[1.02] transition-transform duration-500"

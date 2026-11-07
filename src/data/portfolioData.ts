@@ -1,13 +1,13 @@
 import { Project, ExpertiseItem, EducationCertification, CareerMilestone } from '@/types';
 
 export const OWNER_PROFILE = {
-  name: "Hiranyanabh",
-  brandName: "SHARANG AI",
+  name: "Vishal Kamath",
+  brandName: "SARANG AI",
   tagline: "Bridging Insurance Expertise with Artificial Intelligence.",
   slogan: "Experience · Explore · Engage",
   heroSupport: "Smart Insights. Better Decisions. A Safer Tomorrow.",
   yearsExperience: "7.4 Years",
-  email: "contact@sharang-ai.com",
+  email: "contact@sarang-ai.com",
   linkedin: "https://www.linkedin.com/",
   github: "https://github.com/",
   location: "India",
@@ -200,11 +200,11 @@ export const INITIAL_PROJECTS: Project[] = [
   },
   {
     id: 'proj-4',
-    title: 'SHARANG Underwriting Knowledge Agent',
+    title: 'SARANG Underwriting Knowledge Agent',
     tagline: 'Centralized conversational copilot for group health insurance rules, guidelines, and terms.',
     category: 'GenAI Tools',
     businessProblem: 'Junior underwriting executives and sales teams spend valuable time asking senior underwriters routine questions about standard limits, waiting periods, and deductible rules.',
-    proposedSolution: 'A dedicated AI agent (SHARANG) steeped in insurance underwriting guidelines capable of answering queries, clarifying GPA tables of benefits, and citing standard practice.',
+    proposedSolution: 'A dedicated AI agent (SARANG) steeped in insurance underwriting guidelines capable of answering queries, clarifying GPA tables of benefits, and citing standard practice.',
     tools: ['Gemini 1.5/2.0 API', 'System Conditioning', 'React', 'Tailwind CSS'],
     businessImpact: 'Accelerates onboarding of new underwriters and frees senior capacity for complex corporate risk pricing.',
     status: 'Completed',
@@ -280,8 +280,8 @@ export const EDUCATION_CERTIFICATIONS: EducationCertification[] = [
 
 export const SUGGESTED_QUESTIONS = [
   "What is the difference between GMC and GPA insurance?",
-  "How does Hiranyanabh calculate burn cost for a GMC corporate policy?",
+  "How does Vishal Kamath calculate burn cost for a GMC corporate policy?",
   "Can you explain Incurred Claims Ratio (ICR) and why it matters in underwriting?",
-  "What AI projects has Hiranyanabh developed for insurance automation?",
+  "What AI projects has Vishal Kamath developed for insurance automation?",
   "How can AI improve policy wording analysis without replacing the underwriter?"
 ];
