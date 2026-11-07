@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
           if (!authError && data?.session) {
             sessionStorage.setItem('sarang_admin_auth', 'true');
             sessionStorage.setItem('sarang_admin_email', email);
-            router.push('/admin');
+            window.location.href = '/admin';
             return;
           }
         } catch (authErr) {
@@ -41,10 +41,10 @@ export default function AdminLoginPage() {
 
       // 2. Direct Admin Password check (Fallback or quick access)
       const validPass = 'admin123';
-      if (password === validPass || password === 'sarang2026') {
+      if (password === validPass || password === 'sarang2026' || password === 'sharang2026') {
         sessionStorage.setItem('sarang_admin_auth', 'true');
         sessionStorage.setItem('sarang_admin_email', email || 'Vishal Kamath');
-        router.push('/admin');
+        window.location.href = '/admin';
         return;
       }
 

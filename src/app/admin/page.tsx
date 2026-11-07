@@ -10,7 +10,8 @@ import {
   deleteProjectFromDb, 
   fetchContactMessages, 
   ContactMessageRecord,
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  supabase
 } from '@/lib/supabaseClient';
 import { Project, ProjectCategory, ProjectStatus } from '@/types';
 import { 
@@ -82,11 +83,11 @@ export default function AdminDashboardPage() {
 
   // Check authentication
   useEffect(() => {
-    const auth = sessionStorage.getItem('sarang_admin_auth');
+    const auth = sessionStorage.getItem('sarang_admin_auth') || sessionStorage.getItem('sharang_admin_auth');
     if (auth === 'true') {
       setIsAuthenticated(true);
     } else {
-      router.push('/admin/login');
+      window.location.href = '/admin/login';
     }
   }, [router]);
 
@@ -113,10 +114,22 @@ export default function AdminDashboardPage() {
     }
   }, [isAuthenticated]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     sessionStorage.removeItem('sarang_admin_auth');
     sessionStorage.removeItem('sarang_admin_email');
-    router.push('/admin/login');
+    sessionStorage.removeItem('sharang_admin_auth');
+    sessionStorage.removeItem('sharang_admin_email');
+    localStorage.removeItem('sarang_admin_auth');
+    localStorage.removeItem('sarang_admin_email');
+    localStorage.removeItem('sharang_admin_auth');
+    localStorage.removeItem('sharang_admin_email');
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {}
+    }
+    setIsAuthenticated(false);
+    window.location.href = '/admin/login';
   };
 
   const handleOpenNewProject = () => {
