@@ -3,9 +3,11 @@ import { Project, ExpertiseItem, EducationCertification, CareerMilestone } from 
 export const OWNER_PROFILE = {
   name: "Vishal Kamath",
   brandName: "SARANG AI",
-  tagline: "Bridging Insurance Expertise with Artificial Intelligence.",
+  headline: "The AI-Powered Underwriter.",
+  tagline: "Transforming 7+ Years of Insurance Expertise into Intelligent AI Automation.",
   slogan: "Experience · Explore · Engage",
-  heroSupport: "Smart Insights. Better Decisions. A Safer Tomorrow.",
+  heroSupport: "Transforming 7+ Years of Insurance Expertise into Intelligent AI Automation.",
+  supportingText: "GMC & GPA Underwriting • AI Solutions • Process Automation",
   yearsExperience: "7.4 Years",
   email: "contact@sarang-ai.com",
   linkedin: "https://www.linkedin.com/",

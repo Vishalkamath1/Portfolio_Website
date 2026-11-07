@@ -27,18 +27,18 @@ export default function HeroSection() {
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12]">
-              {OWNER_PROFILE.tagline}
+              The AI-Powered Underwriter.
             </h1>
 
             {/* Supporting Message */}
             <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-sky-300 to-gold-400 bg-clip-text text-transparent">
-              {OWNER_PROFILE.heroSupport}
+              Transforming 7+ Years of Insurance Expertise into Intelligent AI Automation.
             </p>
 
             {/* Introduction Narrative */}
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed mx-auto lg:mx-0">
-              Portfolio of <strong className="text-white font-semibold">{OWNER_PROFILE.name}</strong> — 
-              uniting <span className="text-cyan-300 font-semibold">7.4 years of frontline insurance experience</span> (GMC & GPA underwriting, corporate risk pricing, advanced Excel burn costing) with applied <span className="text-gold-300 font-semibold">AI automation & LLM workflows</span> to modernize underwriting operations.
+              GMC & GPA Underwriting • AI Solutions • Process Automation
+
             </p>
 
             {/* Brand Slogan */}
