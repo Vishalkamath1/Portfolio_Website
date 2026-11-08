@@ -296,9 +296,9 @@ export const EDUCATION_CERTIFICATIONS: EducationCertification[] = [
 ];
 
 export const SUGGESTED_QUESTIONS = [
-  "What is the difference between GMC and GPA insurance?",
-  "How does Vishal Kamath calculate burn cost for a GMC corporate policy?",
-  "Can you explain Incurred Claims Ratio (ICR) and why it matters in underwriting?",
-  "What AI projects has Vishal Kamath developed for insurance automation?",
-  "How can AI improve policy wording analysis without replacing the underwriter?"
+  "Explain the key risk assessment techniques used in GMC and GPA underwriting.",
+  "Demonstrate how an automated burn cost model calculates renewal pricing.",
+  "How do you evaluate loss ratios, claims trends, and portfolio profitability?",
+  "Suggest practical AI automation solutions for repetitive insurance operations.",
+  "Showcase the AI tools developed for real-world insurance use cases."
 ];

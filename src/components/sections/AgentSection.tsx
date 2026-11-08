@@ -34,13 +34,16 @@ export default function AgentSection() {
     {
       id: 'welcome',
       sender: 'sarang',
-      text: `Greetings! I am **SARANG AI**, your central Insurance & AI Intelligence Guardian. 
+      text: `Shri Sita Ram! I'm SARANG.
+YOUR INSURANCE AI INTELLIGENCE COMPANION
 
-I am equipped with **${OWNER_PROFILE.name}'s 7.4 years of insurance domain expertise**—specializing in Group Medical (GMC) and Group Personal Accident (GPA) underwriting, advanced Excel burn costing, and applied AI automation.
+I am an AI-powered assistant designed to bridge the gap between insurance domain expertise and intelligent technology. Built around practical insurance knowledge and AI-driven problem-solving, I can help you explore underwriting strategies, evaluate insurance risks, understand technical concepts, and discover automation opportunities.
 
-How may I assist you today? You can select a suggested topic below or ask anything about GMC underwriting, ICR calculations, or our AI prototypes.`,
+From insurance intelligence to AI innovation — let's build smarter solutions together.
+
+What would you like to explore today?`,
       timestamp: 'Just now',
-      suggestedActions: SUGGESTED_QUESTIONS.slice(0, 3)
+      suggestedActions: SUGGESTED_QUESTIONS
     }
   ]);
   const [input, setInput] = useState('');
@@ -198,9 +201,16 @@ Feel free to ask more specific questions regarding:
       {
         id: 'welcome-reset',
         sender: 'sarang',
-        text: `Session reinitialized. I am **SARANG AI**, your central Insurance Guardian. Ask me anything about ${OWNER_PROFILE.name}'s underwriting experience or GMC/GPA insurance concepts!`,
+        text: `Shri Sita Ram! I'm SARANG.
+YOUR INSURANCE AI INTELLIGENCE COMPANION
+
+I am an AI-powered assistant designed to bridge the gap between insurance domain expertise and intelligent technology. Built around practical insurance knowledge and AI-driven problem-solving, I can help you explore underwriting strategies, evaluate insurance risks, understand technical concepts, and discover automation opportunities.
+
+From insurance intelligence to AI innovation — let's build smarter solutions together.
+
+What would you like to explore today?`,
         timestamp: 'Just now',
-        suggestedActions: SUGGESTED_QUESTIONS.slice(0, 3)
+        suggestedActions: SUGGESTED_QUESTIONS
       }
     ]);
   };
@@ -264,10 +274,10 @@ Feel free to ask more specific questions regarding:
               <div className="p-3.5 rounded-xl bg-navy-950/80 border border-slate-800 text-xs text-slate-300 space-y-2">
                 <div className="flex items-center gap-2 text-cyan-300 font-bold uppercase text-[10px] tracking-wider">
                   <Sparkles className="w-3.5 h-3.5 text-gold-400" />
-                  <span>Guardian Persona Specifications</span>
+                  <span>SYSTEM INTELLIGENCE</span>
                 </div>
                 <p className="text-slate-400 text-[11px] leading-relaxed">
-                  Friendly silver/white-blue guardian robot with a glowing cyan face, gold forehead mark, saffron scarf, and precision arrows—symbolizing razor-sharp insurance underwriting accuracy and risk shielding.
+                  An advanced AI-powered insurance intelligence ecosystem combining 7+ years of GMC & GPA underwriting expertise with AI engineering, intelligent automation, and advanced Excel frameworks. Designed to demonstrate practical solutions for underwriting, risk assessment, claims analytics, and insurance process optimization.
                 </p>
               </div>
 
