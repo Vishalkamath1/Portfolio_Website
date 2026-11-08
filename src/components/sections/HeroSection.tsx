@@ -111,7 +111,7 @@ export default function HeroSection() {
                 {/* Artwork */}
                 <div className="relative aspect-square w-full bg-navy-900">
                   <Image
-                    src="/sarang-archer.jpg"
+                    src="/New sarang-archer.png"
                     alt="SARANG - Your Central Insurance AI Agent"
                     fill
                     priority
