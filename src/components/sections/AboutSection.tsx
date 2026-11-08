@@ -20,10 +20,10 @@ export default function AboutSection() {
             <span>Section 2 · Professional Journey</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            About Me & Career Evolution
+            About Me: From Insurance Expertise to Intelligent AI Solutions
           </h2>
           <p className="mt-4 text-base text-slate-300 leading-relaxed">
-            A comprehensive look at my 7.4-year journey from frontline life insurance advisory into complex corporate group health underwriting, and the ongoing transition to applied insurance artificial intelligence.
+            Over 7+ years of frontline life sales and corporate GMC & GPA underwriting, now bridging insurance expertise with intelligent AI automation.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function AboutSection() {
               <span>Domain Expertise Rooted in Real Underwriting</span>
             </h3>
             
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
               {OWNER_PROFILE.bio}
             </p>
 
@@ -68,34 +68,33 @@ export default function AboutSection() {
           <div className="lg:col-span-5 glass-card rounded-2xl p-6 sm:p-8 space-y-6 bg-gradient-to-br from-navy-900/90 to-navy-950">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                Strategic Perspective
+                Core Competencies
               </span>
               <span className="text-xs text-gold-400 font-semibold bg-gold-950/80 border border-gold-500/30 px-2 py-0.5 rounded">
-                Underwriter-First AI
+                My Vision
               </span>
             </div>
 
             <h4 className="text-lg font-bold text-white leading-snug">
-              Why Domain Expertise Is The Secret Sauce for Insurance AI
+              What Drives Me
             </h4>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Generic software engineers lack intuition for policy exclusions, IBNR factors, corporate co-pays, and TPA billing disputes. 
-              Because I have lived inside corporate broker quotations, member census anomalies, and claim rejection escalations for over 7 years, I know precisely where AI generates genuine leverage versus costly hallucinations.
+              To bridge the gap between traditional insurance expertise and emerging AI technologies—transforming complex insurance processes into smarter, simpler, and more efficient solutions.
             </p>
 
             <ul className="space-y-2.5 text-xs text-slate-300">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <span>Zero false claims of data science or engineering credentials.</span>
+                <span><strong className="text-white">Insurance Domain Expertise:</strong> GMC & GPA underwriting, corporate risk assessment, and core insurance operations.</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <span>Deep comprehension of IRDAI regulatory guidelines and GMC/GPA wordings.</span>
+                <span><strong className="text-white">Analytical Thinking:</strong> Advanced Excel, data interpretation, and strategic business problem-solving.</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                <span>Underwriter-in-the-loop governance for all automated processes.</span>
+                <span><strong className="text-white">AI Innovation:</strong> Building AI-powered solutions, intelligent assistants, and workflow automation.</span>
               </li>
             </ul>
           </div>

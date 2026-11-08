@@ -13,40 +13,44 @@ export const OWNER_PROFILE = {
   linkedin: "https://www.linkedin.com/",
   github: "https://github.com/",
   location: "India",
-  bio: `Insurance domain specialist with 7.4 years of deep operational and underwriting experience across Indian Life and General Insurance sectors. Spent 4.5 years mastering Group Medical Care (GMC) and Group Personal Accident (GPA) underwriting, claims analysis, and risk assessment, backed by 2.9 years in Life Insurance advisory. Currently spearheading domain-led AI automation—leveraging advanced Excel modelling, prompt engineering, and modern AI frameworks to eliminate underwriting bottlenecks, streamline policy analysis, and build intelligent risk intelligence tools.`
+  bio: `I am an insurance professional with over 7+ years of experience across Indian Life Insurance Sales and General Insurance Underwriting, with a strong focus on Group Mediclaim (GMC) & Group Personal Accident (GPA) portfolios. My career began in frontline life insurance sales, directly engaging with clients and managing behavioural risk. That ground-level perspective proved invaluable when I transitioned into corporate risk assessment and underwriting operations with Tata AIG and Zurich Kotak Mahindra General Insurance.
+
+Over the last several years, I have specialized in GMC and GPA portfolios. My day-to-day involves assessing enterprise risk, premium evaluation, claims experience analysis, and navigating complex policy wordings to hit target loss ratios. Through my extensive work in system UAT and product redesign, I recognized a massive gap between traditional underwriting processes and modern technology.
+
+Today, I am bringing together my domain knowledge, analytical skills, and artificial intelligence to create practical solutions for real-world insurance challenges. Having built 5+ AI solutions and prototypes, I explore how Generative AI, intelligent workflows, and automation can simplify complex processes and eliminate underwriting bottlenecks.`,
 };
 
 export const CAREER_JOURNEY: CareerMilestone[] = [
   {
-    period: "4.5 Years",
-    role: "Underwriter — GMC & GPA (Group Health & Accident)",
-    focus: "Risk assessment, portfolio loss ratios, corporate quotations, policy wordings & claims analysis",
+    period: "Corporate Underwriting",
+    role: "Underwriter — GMC & GPA (Tata AIG & Zurich Kotak)",
+    focus: "Enterprise risk, premium evaluation, claims experience analysis & target loss ratios",
     highlights: [
-      "Assessed corporate risk profiles for Group Medical (GMC) and Group Personal Accident (GPA) policies across diverse employee demographics.",
-      "Engineered burn cost analyses, claims ratio projections, and bespoke benefit structure pricings.",
-      "Interpreted complex policy wordings, exclusions, co-pay structures, and corporate sub-limits.",
-      "Collaborated closely with corporate brokers, TPAs, and corporate clients to optimize terms while protecting underwriter profitability."
+      "Specialized in Group Mediclaim (GMC) & Group Personal Accident (GPA) portfolios.",
+      "Assessed enterprise risk, premium evaluation, and claims experience analysis to hit target loss ratios.",
+      "Navigated complex corporate policy wordings, exclusions, and co-pay structures.",
+      "Led extensive work in system UAT and product redesign, identifying key operational gaps."
     ]
   },
   {
-    period: "2.9 Years",
-    role: "Advisor & Consultant — Life Insurance Sales & Advisory",
-    focus: "Client risk profiling, life solutions structuring, retention & customer relationship management",
+    period: "Frontline Sales",
+    role: "Frontline Life Insurance Sales & Advisory",
+    focus: "Direct client engagement, behavioural risk & customer protection",
     highlights: [
-      "Consulted individual and high-net-worth clients on life protection, term cover sizing, and endowment strategies.",
-      "Gained foundational insight into behavioral risk appetite, client onboarding objections, and claim settlement sensitivity.",
-      "Consistently achieved performance benchmarks by translating complex actuarial products into clear customer solutions."
+      "Began career in frontline life insurance sales, directly engaging with clients.",
+      "Managed behavioural risk and gained vital ground-level perspective on customer decision-making.",
+      "Established foundational risk profiling principles that transitioned into corporate underwriting operations."
     ]
   },
   {
-    period: "Current Focus",
-    role: "Insurance AI & Process Automation Specialist (In Transition)",
-    focus: "AI integration, prompt engineering, automation workflows, and insurance analytics",
+    period: "AI & Automation",
+    role: "Applied Insurance AI Specialist",
+    focus: "5+ AI solutions, intelligent workflows & underwriting automation",
     highlights: [
-      "Designing AI prototypes specifically targeted at solving GMC & GPA underwriting friction points.",
-      "Developing LLM prompt frameworks for automated policy wording cross-referencing and clause extraction.",
-      "Utilizing Advanced Excel + AI scripts to accelerate quote turnaround times and data sanitation.",
-      "Bridging the communication gap between core underwriting teams and technical engineering partners."
+      "Built 5+ practical AI solutions and prototypes addressing real-world insurance challenges.",
+      "Brings together domain knowledge, analytical skills, and Generative AI to eliminate underwriting bottlenecks.",
+      "Explores Generative AI, intelligent workflows, and automation to simplify complex underwriting processes.",
+      "Pioneering underwriter-first automation prototypes bridging domain expertise with modern technology."
     ]
   }
 ];
