@@ -51,7 +51,7 @@ export default function ExpertiseSection() {
             Underwriting & AI Expertise
           </h2>
           <p className="mt-4 text-base text-slate-300 leading-relaxed">
-            Strictly authentic domain proficiencies. No exaggerated programming claims—just battle-tested corporate health underwriting, rigorous numerical modelling in Excel, and real-world AI implementation.
+            Authentic domain proficiencies bridging two distinct fields. Combining battle-tested corporate health underwriting and rigorous numerical modelling with real-world AI implementation and process automation.
           </p>
 
           {/* Category Filter Pills */}
