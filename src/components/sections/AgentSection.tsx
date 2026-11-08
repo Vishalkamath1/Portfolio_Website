@@ -220,10 +220,10 @@ Feel free to ask more specific questions regarding:
             <span>Section 5 · Central Assistant</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Meet SARANG AI — Futuristic Archer Guardian
+            Meet Sarang — Your Intelligent Companion
           </h2>
           <p className="mt-4 text-base text-slate-300 leading-relaxed">
-            The single central intelligence of this portfolio. Not a disconnected generic bot, but a domain-steeped underwriter assistant carrying {OWNER_PROFILE.name}’s 7.4 years of insurance experience.
+            LEARN • AUTOMATE • INNOVATE
           </p>
         </div>
 
@@ -238,8 +238,8 @@ Feel free to ask more specific questions regarding:
               <div className="flex items-center gap-4 mb-4">
                 <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-cyan-400 shadow-cyan-glow bg-navy-950 shrink-0">
                   <Image
-                    src="/images/sarang-avatar.jpg"
-                    alt="Sarang AI Avatar"
+                    src="/sarang-guardian.jpeg"
+                    alt="Sarang - Your Intelligent Companion"
                     fill
                     className="object-cover"
                   />
@@ -252,10 +252,10 @@ Feel free to ask more specific questions regarding:
                     </span>
                   </h3>
                   <p className="text-xs text-gold-400 font-semibold tracking-wide">
-                    Archer Guardian of Risk & Protection
+                    Sarang - Your Intelligent Companion
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    Bearing the Ornate Sarang Dhanush & Golden Quiver
+                    LEARN • AUTOMATE • INNOVATE
                   </p>
                 </div>
               </div>
@@ -325,21 +325,21 @@ Feel free to ask more specific questions regarding:
                 <div className="flex items-center gap-3">
                   <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/50">
                     <Image
-                      src="/images/sarang-avatar.jpg"
-                      alt="Sarang"
+                      src="/sarang-guardian.jpeg"
+                      alt="Sarang - Your Intelligent Companion"
                       fill
                       className="object-cover"
                     />
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white flex items-center gap-2">
-                      <span>SARANG AI Console</span>
+                      <span>Sarang - Your Intelligent Companion</span>
                       <span className="text-[10px] text-cyan-300 bg-cyan-950 border border-cyan-500/30 px-1.5 py-0.2 rounded font-semibold capitalize">
                         {activeMode} Mode
                       </span>
                     </div>
                     <div className="text-[11px] text-slate-400">
-                      GMC, GPA & Underwriting Knowledge Engine
+                      LEARN • AUTOMATE • INNOVATE
                     </div>
                   </div>
                 </div>
@@ -364,8 +364,8 @@ Feel free to ask more specific questions regarding:
                       {msg.sender === 'sarang' && (
                         <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
                           <Image
-                            src="/images/sarang-avatar.jpg"
-                            alt="Sarang"
+                            src="/sarang-guardian.jpeg"
+                            alt="Sarang - Your Intelligent Companion"
                             fill
                             className="object-cover"
                           />
@@ -407,8 +407,8 @@ Feel free to ask more specific questions regarding:
                   <div className="flex items-end gap-2">
                     <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
                       <Image
-                        src="/images/sarang-avatar.jpg"
-                        alt="Sarang"
+                        src="/sarang-guardian.jpeg"
+                        alt="Sarang - Your Intelligent Companion"
                         fill
                         className="object-cover"
                       />

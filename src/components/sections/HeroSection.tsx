@@ -111,8 +111,8 @@ export default function HeroSection() {
                 {/* Artwork */}
                 <div className="relative aspect-square w-full bg-navy-900">
                   <Image
-                    src="/images/sarang-archer.jpg"
-                    alt="SARANG AI — Futuristic Archer Guardian"
+                    src="/sarang-archer.jpg"
+                    alt="SARANG - Your Central Insurance AI Agent"
                     fill
                     priority
                     className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
@@ -131,9 +131,9 @@ export default function HeroSection() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-white tracking-wide flex items-center gap-1.5">
-                        SARANG AI <span className="text-[10px] text-cyan-400 bg-cyan-950 px-1 rounded border border-cyan-500/30">v1.0</span>
+                        SARANG - Your Central Insurance AI Agent
                       </div>
-                      <div className="text-[10px] text-slate-400">Central Underwriting Guardian</div>
+                      <div className="text-[10px] text-slate-400">Bridging Insurance Expertise with Artificial Intelligence.</div>
                     </div>
                   </div>
 
