@@ -259,35 +259,39 @@ export const INITIAL_PROJECTS: Project[] = [
 export const EDUCATION_CERTIFICATIONS: EducationCertification[] = [
   {
     id: 'edu-1',
-    title: 'Bachelor of Commerce / Business Studies',
-    issuer: 'Recognized University',
+    badge: 'ACADEMIC DEGREE',
+    title: 'Bachelor of Management Studies (BMS) - Finance',
+    issuer: 'Mumbai University',
     yearOrStatus: 'Completed',
     type: 'degree',
-    description: 'Foundational education in commercial principles, financial accounting, business statistics, and organizational management.'
+    description: 'Foundational education in financial management, corporate finance, and commercial strategy.'
   },
   {
-    id: 'cert-1',
-    title: 'Licentiate / Associate Insurance Studies',
-    issuer: 'Insurance Institute of India (III)',
-    yearOrStatus: 'Insurance Domain',
+    id: 'edu-2',
+    badge: 'POSTGRADUATE DIPLOMA',
+    title: 'PGDM in Marketing Management(Hybrid)',
+    issuer: 'Welingkar Institute of Management',
+    yearOrStatus: 'Completed',
     type: 'certification',
-    description: 'Principles of Insurance, Practice of Life Insurance, and Foundation of Health Insurance underwriting and claims regulation.'
+    description: 'Advanced hybrid programme focusing on market dynamics, strategic positioning, and business communication.'
   },
   {
     id: 'cert-2',
-    title: 'Advanced Corporate Group Underwriting & Burn Costing',
-    issuer: 'Industry Professional Training',
+    badge: 'ADVANCED INSURANCE CREDENTIAL',
+    title: 'CC5 Application of AI & Gen AI in Insurance (Advanced)',
+    issuer: 'Insurance Institute of India (III)',
     yearOrStatus: 'Professional Milestone',
     type: 'certification',
-    description: 'Intensive practical training in Group Medical (GMC) loss ratio computation, corporate quotation structuring, and reinsurance limits.'
+    description: 'Specialized advanced-level certification focusing on the practical implementation of Generative AI directly within the insurance domain.'
   },
   {
     id: 'cert-3',
-    title: 'AI Prompt Engineering & LLM Application Development',
-    issuer: 'Ongoing AI Upskilling',
+    badge: 'TECHNICAL CERTIFICATIONS',
+    title: 'Google AI Professional & Prompting Essentials & Advance Excel',
+    issuer: 'Google, Be10x & Codebasics',
     yearOrStatus: 'In Progress (Active)',
     type: 'course_in_progress',
-    description: 'Practical immersion in prompt conditioning, LLM agent workflows, domain-specific retrieval, and full-stack AI web interfaces.'
+    description: 'Certified in Google AI frameworks, LLM prompting, Claude agent workflows, and advance Excel data modelling.'
   }
 ];
 

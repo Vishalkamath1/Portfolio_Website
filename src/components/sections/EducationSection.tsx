@@ -5,7 +5,31 @@ import { EDUCATION_CERTIFICATIONS } from '@/data/portfolioData';
 import { GraduationCap, Award, BookOpen, CheckCircle, Clock } from 'lucide-react';
 
 export default function EducationSection() {
-  const getTypeBadge = (type: string) => {
+  const getTypeBadge = (type: string, badge?: string) => {
+    if (badge) {
+      if (badge.toUpperCase().includes('DEGREE') || badge.toUpperCase().includes('DIPLOMA')) {
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-blue-950 text-blue-300 border border-blue-500/30">
+            <GraduationCap className="w-3.5 h-3.5" />
+            {badge}
+          </span>
+        );
+      }
+      if (badge.toUpperCase().includes('INSURANCE')) {
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-gold-950 text-gold-300 border border-gold-500/30">
+            <Award className="w-3.5 h-3.5" />
+            {badge}
+          </span>
+        );
+      }
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+          <Award className="w-3.5 h-3.5" />
+          {badge}
+        </span>
+      );
+    }
     switch (type) {
       case 'degree':
         return (
@@ -63,7 +87,7 @@ export default function EducationSection() {
             >
               <div>
                 <div className="flex items-center justify-between gap-3 mb-4">
-                  {getTypeBadge(item.type)}
+                  {getTypeBadge(item.type, item.badge)}
                   <span className="text-xs font-bold text-slate-400">
                     {item.yearOrStatus}
                   </span>

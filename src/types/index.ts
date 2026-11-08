@@ -48,8 +48,10 @@ export interface EducationCertification {
   id: string;
   title: string;
   issuer: string;
+  institution?: string;
+  badge?: string;
   yearOrStatus: string;
-  type: 'degree' | 'certification' | 'course_in_progress';
+  type: 'degree' | 'certification' | 'course_in_progress' | string;
   description: string;
   verificationUrl?: string;
 }
