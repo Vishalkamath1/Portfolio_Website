@@ -120,10 +120,10 @@ export default function ContactSection() {
               </div>
 
               <h3 className="text-xl font-bold text-white mb-2">
-                Curriculum Vitae / Resume
+                Professional Resume
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed mb-6">
-                Download the complete professional summary covering 7.4 years of insurance experience, detailed GMC & GPA loss ratio metrics, Excel modelling achievements, and AI projects.
+                Download a detailed overview of my 7+ years in the insurance sector, including GMC/GPA underwriting metrics, advanced Excel modelling, and applied AI automation projects.
               </p>
 
               <a
@@ -132,7 +132,7 @@ export default function ContactSection() {
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-navy-950 font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-cyan-glow hover:from-cyan-400 hover:to-blue-500 transition-all active:scale-95"
               >
                 <Download className="w-4 h-4" />
-                <span>Download Professional Resume (PDF)</span>
+                <span>Download Resume (PDF)</span>
               </a>
             </div>
 
