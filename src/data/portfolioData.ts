@@ -17,8 +17,9 @@ export const OWNER_PROFILE = {
   image: "/New sarang-archer.png",
   yearsExperience: "7.4 Years",
   email: "contact@sarang-ai.com",
-  linkedin: "https://www.linkedin.com/",
-  github: "https://github.com/",
+  linkedin: "https://www.linkedin.com/in/vishal-kamath-073618a5",
+  github: "https://github.com/Vishalkamath1",
+  resumeUrl: "/Vishal Kamath_Insurance_AI_Resume (2).pdf",
   location: "India",
   bio: `I am an insurance professional with over 7+ years of experience across Indian Life Insurance Sales and General Insurance Underwriting, with a strong focus on Group Mediclaim (GMC) & Group Personal Accident (GPA) portfolios. My career began in frontline life insurance sales, directly engaging with clients and managing behavioural risk. That ground-level perspective proved invaluable when I transitioned into corporate risk assessment and underwriting operations with Tata AIG and Zurich Kotak Mahindra General Insurance.
 
