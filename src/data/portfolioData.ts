@@ -16,7 +16,7 @@ export const OWNER_PROFILE = {
   avatar: "/New sarang-archer.png",
   image: "/New sarang-archer.png",
   yearsExperience: "7.4 Years",
-  email: "contact@sarang-ai.com",
+  email: "Kamathvishal109@gmail.com",
   linkedin: "https://www.linkedin.com/in/vishal-kamath-073618a5",
   github: "https://github.com/Vishalkamath1",
   resumeUrl: "/Vishal Kamath_Insurance_AI_Resume (2).pdf",
