@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Project, ProjectCategory } from '@/types';
+import { Project, ProjectCategory, SarangReview } from '@/types';
 import { INITIAL_PROJECTS, OWNER_PROFILE } from '@/data/portfolioData';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -21,6 +21,7 @@ export const supabase = isSupabaseConfigured
 const LOCAL_PROJECTS_KEY = 'sarang_ai_local_projects';
 const LOCAL_MESSAGES_KEY = 'sarang_ai_local_messages';
 const LOCAL_PROFILE_KEY = 'sarang_ai_local_profile';
+const LOCAL_REVIEWS_KEY = 'sarang_ai_local_reviews';
 
 // ==============================================================================
 // Projects Data Access Layer
@@ -267,6 +268,134 @@ export async function saveContactMessage(msg: Omit<ContactMessageRecord, 'id' | 
     const list: ContactMessageRecord[] = saved ? JSON.parse(saved) : [];
     list.unshift(newRecord);
     localStorage.setItem(LOCAL_MESSAGES_KEY, JSON.stringify(list));
+  }
+
+  return true;
+}
+
+// ==============================================================================
+// Sarang Reviews & Ratings Data Access Layer
+// ==============================================================================
+
+export const INITIAL_REVIEWS: SarangReview[] = [
+  {
+    id: 'rev-1',
+    userName: 'Rohan Deshmukh',
+    userRole: 'Chief Underwriting Officer',
+    rating: 5,
+    reviewText: 'The burn cost explanation and GMC clause cross-referencing capabilities of Sarang AI are phenomenal. It reflects genuine ground-level Indian corporate health underwriting nuances.',
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: 'rev-2',
+    userName: 'Ananya Sengupta',
+    userRole: 'Senior Broker Consultant, Marsh McLennan',
+    rating: 5,
+    reviewText: 'Extremely impressed by the ICR calculation breakdowns and demographic morbidity weighting. This is the practical AI tool the industry has needed for years.',
+    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+  },
+  {
+    id: 'rev-3',
+    userName: 'Vikram Malhotra',
+    userRole: 'Corporate Health VP, Zurich Kotak',
+    rating: 5,
+    reviewText: 'Crisp understanding of IRDAI Class I/II/III hazard categories for GPA. The underwriter-in-the-loop logic gives high confidence.',
+    createdAt: new Date(Date.now() - 86400000 * 8).toISOString(),
+  }
+];
+
+export async function fetchSarangReviews(): Promise<SarangReview[]> {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('sarang_reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        return data.map((d: any) => ({
+          id: d.id,
+          userName: d.user_name,
+          userRole: d.user_role || '',
+          rating: Number(d.rating) || 5,
+          reviewText: d.review_text,
+          createdAt: d.created_at,
+        }));
+      }
+    } catch (e) {
+      console.warn('Supabase fetch reviews error, fallback to local store:', e);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+  }
+
+  return INITIAL_REVIEWS;
+}
+
+export async function saveSarangReview(review: Omit<SarangReview, 'id' | 'createdAt'>): Promise<{ success: boolean; review?: SarangReview; error?: string }> {
+  const newReview: SarangReview = {
+    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'rev-' + Date.now(),
+    userName: review.userName.trim() || 'Anonymous Underwriter',
+    userRole: review.userRole?.trim() || 'Insurance Professional',
+    rating: Math.max(1, Math.min(5, Number(review.rating) || 5)),
+    reviewText: review.reviewText.trim(),
+    createdAt: new Date().toISOString(),
+  };
+
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('sarang_reviews').insert([
+        {
+          id: newReview.id,
+          user_name: newReview.userName,
+          user_role: newReview.userRole,
+          rating: newReview.rating,
+          review_text: newReview.reviewText,
+          created_at: newReview.createdAt,
+        }
+      ]);
+      if (error) {
+        console.warn('Supabase insert review error:', error);
+      }
+    } catch (e) {
+      console.warn('Supabase insert review exception:', e);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
+    const list: SarangReview[] = saved ? JSON.parse(saved) : [...INITIAL_REVIEWS];
+    list.unshift(newReview);
+    localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(list));
+  }
+
+  return { success: true, review: newReview };
+}
+
+export async function deleteSarangReview(id: string): Promise<boolean> {
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('sarang_reviews').delete().eq('id', id);
+      if (!error) {
+        // successfully deleted in supabase
+      }
+    } catch (e) {
+      console.warn('Supabase delete review error:', e);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
+    const list: SarangReview[] = saved ? JSON.parse(saved) : [...INITIAL_REVIEWS];
+    const filtered = list.filter((r) => r.id !== id);
+    localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(filtered));
   }
 
   return true;

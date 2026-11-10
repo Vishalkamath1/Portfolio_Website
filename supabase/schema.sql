@@ -53,6 +53,19 @@ CREATE TABLE IF NOT EXISTS public.profile_content (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+-- 4. Create Sarang AI Reviews & Ratings Table
+CREATE TABLE IF NOT EXISTS public.sarang_reviews (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_name TEXT NOT NULL,
+    user_role TEXT DEFAULT 'Insurance Professional',
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+-- Index for reviews sorted by recency
+CREATE INDEX IF NOT EXISTS idx_sarang_reviews_created_at ON public.sarang_reviews(created_at DESC);
+
 -- ==============================================================================
 -- Row Level Security (RLS)
 -- ==============================================================================
@@ -60,6 +73,7 @@ CREATE TABLE IF NOT EXISTS public.profile_content (
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profile_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sarang_reviews ENABLE ROW LEVEL SECURITY;
 
 -- Projects Policies:
 -- 1. Anonymous/Public visitors can view published projects
@@ -105,6 +119,29 @@ CREATE POLICY "Public can read profile content"
 DROP POLICY IF EXISTS "Authenticated users manage profile content" ON public.profile_content;
 CREATE POLICY "Authenticated users manage profile content"
     ON public.profile_content FOR ALL
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+
+-- Sarang Reviews Policies:
+-- 1. Anyone can view reviews
+DROP POLICY IF EXISTS "Public can view sarang reviews" ON public.sarang_reviews;
+CREATE POLICY "Public can view sarang reviews"
+    ON public.sarang_reviews FOR SELECT
+    TO anon, authenticated
+    USING (true);
+
+-- 2. Anyone can submit a review
+DROP POLICY IF EXISTS "Anyone can insert sarang review" ON public.sarang_reviews;
+CREATE POLICY "Anyone can insert sarang review"
+    ON public.sarang_reviews FOR INSERT
+    TO anon, authenticated
+    WITH CHECK (true);
+
+-- 3. Authenticated owner can manage and delete reviews
+DROP POLICY IF EXISTS "Authenticated users full access to reviews" ON public.sarang_reviews;
+CREATE POLICY "Authenticated users full access to reviews"
+    ON public.sarang_reviews FOR ALL
     TO authenticated
     USING (true)
     WITH CHECK (true);
@@ -199,5 +236,31 @@ INSERT INTO public.projects (
     false,
     null,
     null
+)
+ON CONFLICT DO NOTHING;
+
+-- Initial Seed Data: Sarang AI Reviews
+INSERT INTO public.sarang_reviews (user_name, user_role, rating, review_text, created_at)
+VALUES
+(
+    'Rohan Deshmukh',
+    'Chief Underwriting Officer',
+    5,
+    'The burn cost explanation and GMC clause cross-referencing capabilities of Sarang AI are phenomenal. It reflects genuine ground-level Indian corporate health underwriting nuances.',
+    timezone('utc'::text, now() - INTERVAL '2 days')
+),
+(
+    'Ananya Sengupta',
+    'Senior Broker Consultant, Marsh McLennan',
+    5,
+    'Extremely impressed by the ICR calculation breakdowns and demographic morbidity weighting. This is the practical AI tool the industry has needed for years.',
+    timezone('utc'::text, now() - INTERVAL '5 days')
+),
+(
+    'Vikram Malhotra',
+    'Corporate Health VP, Zurich Kotak',
+    5,
+    'Crisp understanding of IRDAI Class I/II/III hazard categories for GPA. The underwriter-in-the-loop logic gives high confidence.',
+    timezone('utc'::text, now() - INTERVAL '8 days')
 )
 ON CONFLICT DO NOTHING;

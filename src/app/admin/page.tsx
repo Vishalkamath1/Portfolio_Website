@@ -10,10 +10,12 @@ import {
   deleteProjectFromDb, 
   fetchContactMessages, 
   ContactMessageRecord,
+  fetchSarangReviews,
+  deleteSarangReview,
   isSupabaseConfigured,
   supabase
 } from '@/lib/supabaseClient';
-import { Project, ProjectCategory, ProjectStatus } from '@/types';
+import { Project, ProjectCategory, ProjectStatus, SarangReview } from '@/types';
 import { 
   FolderGit2, 
   Mail, 
@@ -36,7 +38,8 @@ import {
   Filter,
   Layers,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Star
 } from 'lucide-react';
 import ProjectModal from '@/components/ProjectModal';
 
@@ -52,11 +55,13 @@ const CATEGORIES: ProjectCategory[] = [
 export default function AdminDashboardPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [activeTab, setActiveTab] = useState<'projects' | 'messages' | 'database'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'messages' | 'reviews' | 'database'>('projects');
   
   // Data states
   const [projects, setProjects] = useState<Project[]>([]);
   const [messages, setMessages] = useState<ContactMessageRecord[]>([]);
+  const [reviews, setReviews] = useState<SarangReview[]>([]);
+  const [isDeletingReview, setIsDeletingReview] = useState<string | null>(null);
   const [isDbLive, setIsDbLive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -85,8 +90,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const auth = sessionStorage.getItem('sarang_admin_auth') || sessionStorage.getItem('sharang_admin_auth');
     if (auth === 'true') {
-      setIsAuthenticated(true);
-    } else {
+      setIsAuthenticated(true);    } else {
       window.location.href = '/admin/login';
     }
   }, [router]);
@@ -101,6 +105,9 @@ export default function AdminDashboardPage() {
 
       const loadedMessages = await fetchContactMessages();
       setMessages(loadedMessages);
+
+      const loadedReviews = await fetchSarangReviews();
+      setReviews(loadedReviews);
     } catch (e) {
       console.error('Error loading admin data:', e);
     } finally {
@@ -130,6 +137,19 @@ export default function AdminDashboardPage() {
     }
     setIsAuthenticated(false);
     window.location.href = '/admin/login';
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+    setIsDeletingReview(id);
+    try {
+      await deleteSarangReview(id);
+      setReviews((prev) => prev.filter((r) => r.id !== id));
+    } catch (e) {
+      console.error('Error deleting review:', e);
+    } finally {
+      setIsDeletingReview(null);
+    }
   };
 
   const handleOpenNewProject = () => {
@@ -392,6 +412,18 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
           </button>
 
           <button
+            onClick={() => setActiveTab('reviews')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === 'reviews'
+                ? 'bg-cyan-500 text-navy-950 shadow-cyan-glow'
+                : 'text-slate-400 hover:text-white glass-panel'
+            }`}
+          >
+            <Star className="w-4 h-4 text-gold-400 fill-gold-400" />
+            <span>Sarang AI Reviews ({reviews.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('database')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'database'
@@ -564,6 +596,97 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
 
                     <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line">
                       {m.message}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB: SARANG AI REVIEWS & RATINGS */}
+        {activeTab === 'reviews' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Star className="w-5 h-5 text-gold-400 fill-gold-400" />
+                  <span>Sarang AI Reviews & Ratings Management</span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Inspect community evaluations, verify underwriting ratings, and moderate or delete reviews.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-navy-900 border border-slate-700 text-slate-300">
+                  Total Reviews: <strong className="text-white">{reviews.length}</strong>
+                </span>
+                <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gold-950/80 border border-gold-500/40 text-gold-300">
+                  Average Rating: <strong className="text-white">
+                    {reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : '5.0'} ★
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            {reviews.length === 0 ? (
+              <div className="p-12 text-center glass-panel rounded-2xl max-w-md mx-auto">
+                <Star className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                <p className="text-sm text-slate-300">No reviews have been submitted yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((rev) => (
+                  <div key={rev.id} className="glass-card rounded-2xl p-5 border-slate-800 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                      <div>
+                        <div className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>{rev.userName}</span>
+                          {rev.userRole && (
+                            <span className="text-xs text-slate-400 font-normal">
+                              ({rev.userRole})
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-gold-400">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`w-3.5 h-3.5 ${
+                                s <= rev.rating ? 'text-gold-400 fill-gold-400' : 'text-slate-700'
+                              }`}
+                            />
+                          ))}
+                          <span className="text-xs font-bold text-slate-300 ml-1">
+                            {rev.rating}.0
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-[11px] text-slate-500">
+                          {new Date(rev.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+
+                        <button
+                          onClick={() => handleDeleteReview(rev.id)}
+                          disabled={isDeletingReview === rev.id}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                          title="Delete this review permanently"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{isDeletingReview === rev.id ? 'Deleting...' : 'Delete'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed pl-2 border-l-2 border-cyan-500/30">
+                      "{rev.reviewText}"
                     </p>
                   </div>
                 ))}

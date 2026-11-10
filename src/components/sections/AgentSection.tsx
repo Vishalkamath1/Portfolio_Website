@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { SUGGESTED_QUESTIONS, OWNER_PROFILE } from '@/data/portfolioData';
 import { ChatMessage, SpecialistMode } from '@/types';
+import SarangReviews from './SarangReviews';
 
 export type SarangTab = 'jnana' | 'karma' | 'drishti';
 
@@ -977,6 +978,9 @@ What would you like to explore today?`,
             <DrishtiDashboard />
           </div>
         )}
+
+        {/* Sarang AI Reviews & Community Ratings Feed */}
+        <SarangReviews />
 
       </div>
     </section>

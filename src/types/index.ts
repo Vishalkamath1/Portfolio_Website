@@ -72,3 +72,13 @@ export type SpecialistMode =
   | 'knowledge'
   | 'analytics'
   | 'automation';
+
+export interface SarangReview {
+  id: string;
+  userName: string;
+  userRole?: string;
+  rating: number; // 1 to 5
+  reviewText: string;
+  createdAt: string;
+}
+
