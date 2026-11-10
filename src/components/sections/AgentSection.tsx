@@ -685,9 +685,9 @@ What would you like to explore today?`,
                       : 'text-slate-400 hover:text-white hover:bg-navy-900/50 border border-transparent hover:border-slate-800'
                   }`}
                 >
-                  <div className="w-full flex flex-col items-center justify-center">
-                    {/* Top Row Group: Icon + Main Text + Badge */}
-                    <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1">
+                  <div className="flex flex-col items-center justify-center w-full">
+                    {/* Top Row: Icon, Main Title, and Badge (if any) */}
+                    <div className="flex flex-row items-center justify-center space-x-2 mb-1">
                       <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-400'}`} />
                       <span className="text-xs sm:text-sm font-black tracking-wider uppercase whitespace-nowrap">
                         {tab.name}
@@ -695,12 +695,12 @@ What would you like to explore today?`,
                       {tab.badge && (
                         <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-navy-900 text-gold-400 border border-gold-500/40 shrink-0">
                           <Lock className="w-2.5 h-2.5 text-gold-400" />
-                          <span className="hidden md:inline">{tab.badge}</span>
+                          <span>{tab.badge}</span>
                         </span>
                       )}
                     </div>
 
-                    {/* Subtitle: Perfectly Centered Below the Top Row Group */}
+                    {/* Subtitle: Directly below top row */}
                     <span className={`text-[10px] font-bold tracking-widest uppercase text-center block ${
                       isActive ? 'text-cyan-300' : 'text-slate-400'
                     }`}>
