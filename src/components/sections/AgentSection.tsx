@@ -679,29 +679,34 @@ What would you like to explore today?`,
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative py-3.5 px-2 sm:px-6 rounded-xl text-center transition-all duration-300 flex flex-col items-center justify-center group ${
+                  className={`relative py-3.5 px-2 sm:px-6 rounded-xl transition-all duration-300 w-full flex flex-col items-center justify-center group ${
                     isActive
                       ? 'bg-gradient-to-r from-cyan-950/90 via-navy-900 to-blue-950/90 text-white border border-cyan-400 shadow-cyan-glow'
                       : 'text-slate-400 hover:text-white hover:bg-navy-900/50 border border-transparent hover:border-slate-800'
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-400'}`} />
-                    <span className="text-xs sm:text-sm font-black tracking-wider uppercase">
-                      {tab.name}
-                    </span>
-                    {tab.badge && (
-                      <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-navy-900 text-gold-400 border border-gold-500/40 shrink-0">
-                        <Lock className="w-2.5 h-2.5 text-gold-400" />
-                        <span className="hidden md:inline">{tab.badge}</span>
+                  <div className="w-full flex flex-col items-center justify-center">
+                    {/* Top Row Group: Icon + Main Text + Badge */}
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1">
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-400'}`} />
+                      <span className="text-xs sm:text-sm font-black tracking-wider uppercase whitespace-nowrap">
+                        {tab.name}
                       </span>
-                    )}
+                      {tab.badge && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-navy-900 text-gold-400 border border-gold-500/40 shrink-0">
+                          <Lock className="w-2.5 h-2.5 text-gold-400" />
+                          <span className="hidden md:inline">{tab.badge}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Subtitle: Perfectly Centered Below the Top Row Group */}
+                    <span className={`text-[10px] font-bold tracking-widest uppercase text-center block ${
+                      isActive ? 'text-cyan-300' : 'text-slate-400'
+                    }`}>
+                      {tab.shortLabel}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-bold tracking-widest uppercase ${
-                    isActive ? 'text-cyan-300' : 'text-slate-400'
-                  }`}>
-                    {tab.shortLabel}
-                  </span>
                 </button>
               );
             })}
