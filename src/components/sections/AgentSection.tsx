@@ -826,8 +826,8 @@ What would you like to explore today?`,
                     <div>
                       <div className="text-sm font-bold text-white flex items-center gap-2">
                         <span>Sarang - Your Intelligent Companion</span>
-                        <span className="text-[10px] text-cyan-300 bg-cyan-950 border border-cyan-500/30 px-1.5 py-0.2 rounded font-semibold capitalize">
-                          {activeMode} Mode
+                        <span className="text-[10px] text-cyan-300 bg-cyan-950 border border-cyan-500/30 px-2 py-0.5 rounded font-semibold uppercase tracking-wider">
+                          {currentTab.name} Mode
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-400">
