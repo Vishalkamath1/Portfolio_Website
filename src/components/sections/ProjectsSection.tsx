@@ -3,34 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { INITIAL_PROJECTS } from '@/data/portfolioData';
 import { fetchProjectsFromDb } from '@/lib/supabaseClient';
-import { Project, ProjectCategory } from '@/types';
+import { Project } from '@/types';
 import ProjectModal from '@/components/ProjectModal';
 import { 
   FolderGit2, 
-  Search, 
   ArrowRight, 
   AlertCircle, 
   CheckCircle2, 
   Clock, 
-  Lightbulb, 
-  ExternalLink,
-  Layers
+  Lightbulb
 } from 'lucide-react';
-
-const CATEGORIES: ('All' | ProjectCategory)[] = [
-  'All',
-  'GMC & GPA Underwriting AI',
-  'Claims Automation',
-  'GenAI Tools',
-  'Insurance Analytics / Power BI',
-  'Automation (Excel/Python)',
-  'Experiments'
-];
 
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
-  const [selectedCategory, setSelectedCategory] = useState<'All' | ProjectCategory>('All');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
@@ -47,15 +32,7 @@ export default function ProjectsSection() {
     loadProjects();
   }, []);
 
-  const filteredProjects = projects.filter((p) => {
-    const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
-    const matchesQuery = 
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.businessProblem.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.tools.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesQuery && p.published;
-  });
+  const publishedProjects = projects.filter((p) => p.published !== false);
 
   const getStatusBadge = (status: Project['status']) => {
     switch (status) {
@@ -102,68 +79,22 @@ export default function ProjectsSection() {
             AI Projects & Underwriting Tools
           </h2>
           <p className="mt-4 text-base text-slate-300 leading-relaxed">
-            A searchable, database-driven library of domain-specific prototypes engineered to resolve real insurance underwriting bottlenecks.
+            A domain-specific portfolio of prototypes engineered to resolve real insurance underwriting bottlenecks.
           </p>
           <div className="mt-2 text-xs text-amber-400/90 font-medium">
             * All sample tools are demonstration models built with sanitized synthetic data.
           </div>
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="mb-10 space-y-4">
-          {/* Search Box */}
-          <div className="relative max-w-xl mx-auto">
-            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by project name, keyword, or tool (e.g. Gemini, Excel, GMC)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-navy-950/90 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors shadow-inner"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="text-xs text-slate-400 hover:text-white absolute right-4 top-1/2 -translate-y-1/2"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          {/* Category Pills Scrollable Row */}
-          <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-2 pt-2 px-2 no-scrollbar">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-cyan-500 text-navy-950 shadow-cyan-glow font-bold'
-                    : 'glass-panel text-slate-300 hover:text-white hover:border-slate-700'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+        {/* Projects Grid directly below Section Header */}
+        {publishedProjects.length === 0 ? (
           <div className="text-center py-16 glass-card rounded-2xl max-w-md mx-auto">
             <AlertCircle className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-            <p className="text-sm text-slate-300 font-medium">No projects match your filter criteria.</p>
-            <button
-              onClick={() => { setSelectedCategory('All'); setSearchQuery(''); }}
-              className="mt-3 text-xs text-cyan-400 hover:underline"
-            >
-              Reset all filters
-            </button>
+            <p className="text-sm text-slate-300 font-medium">No published projects available at this time.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProjects.map((project) => (
+            {publishedProjects.map((project) => (
               <div
                 key={project.id}
                 className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:border-cyan-400/50 hover:shadow-cyan-glow transition-all group cursor-pointer"
