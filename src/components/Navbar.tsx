@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Shield, Bot, Sparkles, Lock } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Menu, X, Shield, Bot, Sparkles, Lock, LogOut } from 'lucide-react';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabaseClient';
 
 const NAV_LINKS = [
   { name: 'Home', href: '#hero' },
@@ -16,8 +18,10 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +30,56 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const local = 
+        sessionStorage.getItem('sarang_admin_auth') || 
+        localStorage.getItem('sarang_admin_auth') ||
+        sessionStorage.getItem('sharang_admin_auth');
+      if (local) {
+        setIsAdmin(true);
+        return;
+      }
+      if (supabase) {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session) {
+            setIsAdmin(true);
+          }
+        } catch (e) {
+          // ignore session check errors
+        }
+      }
+    };
+    checkAuth();
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    sessionStorage.removeItem('sarang_admin_auth');
+    sessionStorage.removeItem('sarang_admin_email');
+    sessionStorage.removeItem('sharang_admin_auth');
+    sessionStorage.removeItem('sharang_admin_email');
+    localStorage.removeItem('sarang_admin_auth');
+    localStorage.removeItem('sarang_admin_email');
+    localStorage.removeItem('sharang_admin_auth');
+    localStorage.removeItem('sharang_admin_email');
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn('Signout error:', e);
+      }
+    }
+    setIsAdmin(false);
+    window.location.href = '/admin/login';
+  };
+
+  // Hide the public marketing navbar entirely on Admin dashboard & Admin login pages
+  // to avoid overlapping with the dedicated Admin Top Navigation header
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <nav
@@ -77,15 +131,37 @@ export default function Navbar() {
 
             <div className="h-4 w-px bg-slate-700/60 mx-2" />
 
-            {/* Admin Dashboard Entry */}
-            <Link
-              href="/admin"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-gold-400 hover:border-gold-500/40 border border-transparent rounded-md transition-colors"
-              title="Owner Admin Dashboard"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              <span>Admin</span>
-            </Link>
+            {/* Admin Dashboard Entry / Auth Actions */}
+            {isAdmin ? (
+              <div className="flex flex-row items-center justify-end gap-2">
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-gold-400 bg-gold-950/60 border border-gold-500/40 rounded-md hover:bg-gold-900/60 transition-colors"
+                  title="Owner Admin Dashboard"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Dashboard</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/50 border border-rose-500/30 hover:bg-rose-900/60 rounded-md transition-colors cursor-pointer"
+                  title="Log Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-gold-400 hover:border-gold-500/40 border border-transparent rounded-md transition-colors"
+                title="Owner Admin Dashboard"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Admin</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -126,14 +202,38 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-3 border-t border-slate-800/80">
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gold-400 hover:text-gold-300"
-            >
-              <Lock className="w-4 h-4" />
-              Owner Admin Portal
-            </Link>
+            {isAdmin ? (
+              <div className="flex items-center justify-between px-4 py-2">
+                <Link
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-sm text-gold-400 hover:text-gold-300"
+                >
+                  <Lock className="w-4 h-4" />
+                  Admin Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/50 border border-rose-500/30 rounded-md"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gold-400 hover:text-gold-300"
+              >
+                <Lock className="w-4 h-4" />
+                Owner Admin Portal
+              </Link>
+            )}
           </div>
         </div>
       )}

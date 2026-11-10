@@ -1,10 +1,19 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Shield, Mail, Linkedin, Github, ArrowUp, Lock } from 'lucide-react';
 import { OWNER_PROFILE } from '@/data/portfolioData';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on Admin routes for a dedicated clean dashboard experience
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
   return (
     <footer className="relative bg-navy-950 border-t border-slate-800/80 pt-16 pb-12 overflow-hidden">
       {/* Background ambient glow */}

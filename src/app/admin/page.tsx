@@ -122,21 +122,28 @@ export default function AdminDashboardPage() {
   }, [isAuthenticated]);
 
   const handleLogout = async () => {
-    sessionStorage.removeItem('sarang_admin_auth');
-    sessionStorage.removeItem('sarang_admin_email');
-    sessionStorage.removeItem('sharang_admin_auth');
-    sessionStorage.removeItem('sharang_admin_email');
-    localStorage.removeItem('sarang_admin_auth');
-    localStorage.removeItem('sarang_admin_email');
-    localStorage.removeItem('sharang_admin_auth');
-    localStorage.removeItem('sharang_admin_email');
-    if (supabase) {
-      try {
+    try {
+      // 1. Clear session and local storage authentication
+      sessionStorage.removeItem('sarang_admin_auth');
+      sessionStorage.removeItem('sarang_admin_email');
+      sessionStorage.removeItem('sharang_admin_auth');
+      sessionStorage.removeItem('sharang_admin_email');
+      localStorage.removeItem('sarang_admin_auth');
+      localStorage.removeItem('sarang_admin_email');
+      localStorage.removeItem('sharang_admin_auth');
+      localStorage.removeItem('sharang_admin_email');
+
+      // 2. Perform Supabase authentication sign-out
+      if (supabase) {
         await supabase.auth.signOut();
-      } catch (e) {}
+      }
+    } catch (e) {
+      console.warn('Error during Supabase sign-out:', e);
+    } finally {
+      setIsAuthenticated(false);
+      // 3. Automatically route the user back to the login screen
+      window.location.href = '/admin/login';
     }
-    setIsAuthenticated(false);
-    window.location.href = '/admin/login';
   };
 
   const handleDeleteReview = async (id: string) => {
@@ -283,19 +290,20 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-row items-center justify-end gap-4">
             <Link
               href="/"
               target="_blank"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white glass-panel border-slate-700 hover:border-cyan-400 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white glass-panel border border-slate-700 hover:border-cyan-400 transition-colors"
             >
               <span>View Live Portfolio</span>
               <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
             </Link>
 
             <button
+              type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/50 border border-rose-500/30 hover:bg-rose-900/60 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/50 border border-rose-500/30 hover:bg-rose-900/60 transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Log Out</span>
