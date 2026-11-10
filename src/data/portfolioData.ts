@@ -11,7 +11,7 @@ export const OWNER_PROFILE = {
   agentTitle: "SARANG - Your Central Insurance AI Agent",
   agentTagline: "Bridging Insurance Expertise with Artificial Intelligence.",
   companionTitle: "Sarang - Your Intelligent Companion",
-  companionMotto: "LEARN • AUTOMATE • INNOVATE",
+  companionMotto: "LEARN • EXECUTE • MONITOR",
   heroImage: "/New sarang-archer.png",
   avatar: "/New sarang-archer.png",
   image: "/New sarang-archer.png",

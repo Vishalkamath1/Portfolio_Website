@@ -753,7 +753,7 @@ What would you like to explore today?`,
                       Sarang - Your Intelligent Companion
                     </p>
                     <p className="text-[11px] text-slate-400">
-                      LEARN • AUTOMATE • INNOVATE
+                      LEARN • EXECUTE • MONITOR
                     </p>
                   </div>
                 </div>
@@ -837,7 +837,7 @@ What would you like to explore today?`,
                         </span>
                       </div>
                       <div className="text-[11px] text-slate-400">
-                        LEARN • AUTOMATE • INNOVATE
+                        LEARN • EXECUTE • MONITOR
                       </div>
                     </div>
                   </div>
