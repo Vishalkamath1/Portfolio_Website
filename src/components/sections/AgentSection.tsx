@@ -569,80 +569,65 @@ Feel free to ask more specific questions regarding:
       specialistMode: activeMode
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const aiMessageId = (Date.now() + 1).toString();
+    const initialAiMessage: ChatMessage = {
+      id: aiMessageId,
+      sender: 'sarang',
+      text: '',
+      timestamp: 'Just now'
+    };
+
+    // Immediately push user message and placeholder assistant message for instant UI feedback
+    setMessages((prev) => [...prev, userMessage, initialAiMessage]);
     setInput('');
     setIsLoading(true);
 
-    const aiMessageId = (Date.now() + 1).toString();
-
     try {
-      // Connect to the new /api/jnana Gemini streaming route
+      // Connect to the streaming /api/jnana Gemini route
       const response = await fetch('/api/jnana', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: query, mode: activeMode })
       });
 
-      if (response.ok && response.body) {
-        // Create initial empty message container for real-time streaming
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: aiMessageId,
-            sender: 'sarang',
-            text: '',
-            timestamp: 'Just now'
-          }
-        ]);
+      if (!response.ok || !response.body) {
+        throw new Error(`HTTP error ${response.status}`);
+      }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let accumulatedText = '';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let accumulatedText = '';
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedText += chunk;
+      // Stream chunks word-by-word into the UI state as they arrive
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === aiMessageId ? { ...msg, text: accumulatedText } : msg
-            )
-          );
-        }
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedText += chunk;
 
-        // Fallback to domain response if stream closed empty
-        if (!accumulatedText.trim()) {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === aiMessageId ? { ...msg, text: getDemoResponse(query, activeMode) } : msg
-            )
-          );
-        }
-      } else {
-        // Fallback to intelligent local demo response
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: aiMessageId,
-            sender: 'sarang',
-            text: getDemoResponse(query, activeMode),
-            timestamp: 'Just now'
-          }
-        ]);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMessageId ? { ...msg, text: accumulatedText } : msg
+          )
+        );
+      }
+
+      // Fallback if the stream closed empty
+      if (!accumulatedText.trim()) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === aiMessageId ? { ...msg, text: getDemoResponse(query, activeMode) } : msg
+          )
+        );
       }
     } catch (err) {
-      console.warn('[Jnana Chat] Streaming route error, using local fallback:', err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: aiMessageId,
-          sender: 'sarang',
-          text: getDemoResponse(query, activeMode),
-          timestamp: 'Just now'
-        }
-      ]);
+      console.warn('[Jnana Chat] Streaming error, using domain fallback:', err);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === aiMessageId ? { ...msg, text: getDemoResponse(query, activeMode) } : msg
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -900,7 +885,20 @@ What would you like to explore today?`,
                           }`}
                         >
                           <div className="whitespace-pre-line prose prose-invert prose-sm max-w-none">
-                            {msg.text}
+                            {msg.text ? (
+                              <>
+                                {msg.text}
+                                {isLoading && msg.id === messages[messages.length - 1]?.id && (
+                                  <span className="inline-block w-1.5 h-3.5 bg-cyan-400 ml-1 animate-pulse align-middle" />
+                                )}
+                              </>
+                            ) : (
+                              <div className="flex items-center gap-1.5 py-1">
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" />
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]" />
+                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]" />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -922,25 +920,6 @@ What would you like to explore today?`,
                       )}
                     </div>
                   ))}
-
-                  {isLoading && (!messages[messages.length - 1] || messages[messages.length - 1].sender !== 'sarang' || !messages[messages.length - 1].text) && (
-                    <div className="flex items-end gap-2">
-                      <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
-                        <Image
-                          src="/sarang-guardian.jpeg"
-                          alt="Sarang - Your Intelligent Companion"
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="glass-panel border-cyan-500/20 rounded-2xl rounded-bl-none p-3.5 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" />
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]" />
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]" />
-                        <span className="text-xs text-slate-400 ml-1">Analyzing underwriting knowledge...</span>
-                      </div>
-                    </div>
-                  )}
 
                   <div ref={messagesEndRef} />
                 </div>
