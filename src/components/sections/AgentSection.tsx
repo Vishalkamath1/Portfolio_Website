@@ -573,54 +573,76 @@ Feel free to ask more specific questions regarding:
     setInput('');
     setIsLoading(true);
 
+    const aiMessageId = (Date.now() + 1).toString();
+
     try {
-      // Attempt server route /api/chat
-      const response = await fetch('/api/chat', {
+      // Connect to the new /api/jnana Gemini streaming route
+      const response = await fetch('/api/jnana', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: query, mode: activeMode })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const replyText = data.reply || getDemoResponse(query, activeMode);
-        
+      if (response.ok && response.body) {
+        // Create initial empty message container for real-time streaming
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: aiMessageId,
             sender: 'sarang',
-            text: replyText,
+            text: '',
             timestamp: 'Just now'
           }
         ]);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let accumulatedText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedText += chunk;
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId ? { ...msg, text: accumulatedText } : msg
+            )
+          );
+        }
+
+        // Fallback to domain response if stream closed empty
+        if (!accumulatedText.trim()) {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId ? { ...msg, text: getDemoResponse(query, activeMode) } : msg
+            )
+          );
+        }
       } else {
-        // Fallback to intelligent local demo responses
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: (Date.now() + 1).toString(),
-              sender: 'sarang',
-              text: getDemoResponse(query, activeMode),
-              timestamp: 'Just now'
-            }
-          ]);
-        }, 500);
-      }
-    } catch {
-      // Offline fallback
-      setTimeout(() => {
+        // Fallback to intelligent local demo response
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: aiMessageId,
             sender: 'sarang',
             text: getDemoResponse(query, activeMode),
             timestamp: 'Just now'
           }
         ]);
-      }, 500);
+      }
+    } catch (err) {
+      console.warn('[Jnana Chat] Streaming route error, using local fallback:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: aiMessageId,
+          sender: 'sarang',
+          text: getDemoResponse(query, activeMode),
+          timestamp: 'Just now'
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -901,7 +923,7 @@ What would you like to explore today?`,
                     </div>
                   ))}
 
-                  {isLoading && (
+                  {isLoading && (!messages[messages.length - 1] || messages[messages.length - 1].sender !== 'sarang' || !messages[messages.length - 1].text) && (
                     <div className="flex items-end gap-2">
                       <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
                         <Image
