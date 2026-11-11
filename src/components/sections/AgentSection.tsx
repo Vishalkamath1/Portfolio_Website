@@ -24,7 +24,7 @@ import {
   Eye,
   Clock
 } from 'lucide-react';
-import { SUGGESTED_QUESTIONS, OWNER_PROFILE } from '@/data/portfolioData';
+import { OWNER_PROFILE } from '@/data/portfolioData';
 import { ChatMessage, SpecialistMode } from '@/types';
 import SarangReviews from './SarangReviews';
 
@@ -903,48 +903,11 @@ Feel free to ask more specific questions regarding:
                             </div>
                           </div>
                         </div>
-
-                        {/* Suggested Question Actions on Welcome */}
-                        {msg.suggestedActions && (
-                          <div className="mt-3 pl-9 flex flex-wrap gap-2">
-                            {msg.suggestedActions.map((action, aIdx) => (
-                              <button
-                                key={aIdx}
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleSendMessage(action);
-                                }}
-                                className="text-left text-xs px-3 py-1.5 rounded-lg bg-navy-900/90 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/50 hover:border-cyan-400 transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
-                              >
-                                <span>{action}</span>
-                                <ArrowRight className="w-3 h-3 shrink-0" />
-                              </button>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     ))
                   )}
 
                   <div ref={messagesEndRef} />
-                </div>
-
-                {/* Suggested Questions Quick Row */}
-                <div className="px-4 py-2 bg-navy-900/50 border-t border-slate-800/60 overflow-x-auto flex gap-2 no-scrollbar">
-                  {SUGGESTED_QUESTIONS.map((q, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleSendMessage(q);
-                      }}
-                      className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40 transition-colors cursor-pointer"
-                    >
-                      {q}
-                    </button>
-                  ))}
                 </div>
 
                 {/* Input Form */}
