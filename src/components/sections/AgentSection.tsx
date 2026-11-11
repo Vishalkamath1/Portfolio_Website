@@ -441,34 +441,29 @@ function DrishtiDashboard() {
 /* -------------------------------------------------------------------------- */
 export default function AgentSection() {
   const [activeTab, setActiveTab] = useState<SarangTab>('jnana');
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      sender: 'sarang',
-      text: `Shri Sita Ram! I'm SARANG.
-YOUR INSURANCE AI INTELLIGENCE COMPANION
-
-I am an AI-powered assistant designed to bridge the gap between insurance domain expertise and intelligent technology. Built around practical insurance knowledge and AI-driven problem-solving, I can help you explore underwriting strategies, evaluate insurance risks, understand technical concepts, and discover automation opportunities.
-
-From insurance intelligence to AI innovation — let's build smarter solutions together.
-
-What would you like to explore today?`,
-      timestamp: 'Just now',
-      suggestedActions: SUGGESTED_QUESTIONS
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeMode, setActiveMode] = useState<SpecialistMode>('general');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatScrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (smooth = true) => {
+    if (chatScrollContainerRef.current) {
+      chatScrollContainerRef.current.scrollTo({
+        top: chatScrollContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto'
+      });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages.length, isLoading]);
 
   // Intelligent demo response generator when Gemini API route is running in demo mode
   const getDemoResponse = (query: string, mode: SpecialistMode): string => {
@@ -634,22 +629,7 @@ Feel free to ask more specific questions regarding:
   };
 
   const handleResetChat = () => {
-    setMessages([
-      {
-        id: 'welcome-reset',
-        sender: 'sarang',
-        text: `Shri Sita Ram! I'm SARANG.
-YOUR INSURANCE AI INTELLIGENCE COMPANION
-
-I am an AI-powered assistant designed to bridge the gap between insurance domain expertise and intelligent technology. Built around practical insurance knowledge and AI-driven problem-solving, I can help you explore underwriting strategies, evaluate insurance risks, understand technical concepts, and discover automation opportunities.
-
-From insurance intelligence to AI innovation — let's build smarter solutions together.
-
-What would you like to explore today?`,
-        timestamp: 'Just now',
-        suggestedActions: SUGGESTED_QUESTIONS
-      }
-    ]);
+    setMessages([]);
   };
 
   const currentTab = SARANG_TABS.find(t => t.id === activeTab) || SARANG_TABS[0];
@@ -859,67 +839,93 @@ What would you like to explore today?`,
                 </div>
 
                 {/* Messages Scroll Area */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
-                    >
-                      <div className="flex items-end gap-2 max-w-[88%] sm:max-w-[80%]">
-                        {msg.sender === 'sarang' && (
-                          <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
-                            <Image
-                              src="/sarang-guardian.jpeg"
-                              alt="Sarang - Your Intelligent Companion"
-                              fill
-                              className="object-cover"
-                            />
+                <div 
+                  ref={chatScrollContainerRef}
+                  className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"
+                >
+                  {messages.length === 0 ? (
+                    <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/40 shadow-cyan-glow mb-3 bg-navy-900">
+                        <Image
+                          src="/sarang-guardian.jpeg"
+                          alt="Sarang AI"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-300 font-semibold mb-1">
+                        Jnana Intelligence Assistant
+                      </p>
+                      <p className="text-[11px] text-slate-500 max-w-xs">
+                        Ask any insurance underwriting or technical question below to start the conversation.
+                      </p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
+                      >
+                        <div className="flex items-end gap-2 max-w-[88%] sm:max-w-[80%]">
+                          {msg.sender === 'sarang' && (
+                            <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
+                              <Image
+                                src="/sarang-guardian.jpeg"
+                                alt="Sarang - Your Intelligent Companion"
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+
+                          <div
+                            className={`rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
+                              msg.sender === 'user'
+                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-br-none shadow-cyan-glow'
+                                : 'glass-panel border-cyan-500/20 text-slate-200 rounded-bl-none shadow-md'
+                            }`}
+                          >
+                            <div className="whitespace-pre-line prose prose-invert prose-sm max-w-none">
+                              {msg.text ? (
+                                <>
+                                  {msg.text}
+                                  {isLoading && msg.id === messages[messages.length - 1]?.id && (
+                                    <span className="inline-block w-1.5 h-3.5 bg-cyan-400 ml-1 animate-pulse align-middle" />
+                                  )}
+                                </>
+                              ) : (
+                                <div className="flex items-center gap-1.5 py-1">
+                                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" />
+                                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]" />
+                                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Suggested Question Actions on Welcome */}
+                        {msg.suggestedActions && (
+                          <div className="mt-3 pl-9 flex flex-wrap gap-2">
+                            {msg.suggestedActions.map((action, aIdx) => (
+                              <button
+                                key={aIdx}
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleSendMessage(action);
+                                }}
+                                className="text-left text-xs px-3 py-1.5 rounded-lg bg-navy-900/90 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/50 hover:border-cyan-400 transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+                              >
+                                <span>{action}</span>
+                                <ArrowRight className="w-3 h-3 shrink-0" />
+                              </button>
+                            ))}
                           </div>
                         )}
-
-                        <div
-                          className={`rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
-                            msg.sender === 'user'
-                              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-br-none shadow-cyan-glow'
-                              : 'glass-panel border-cyan-500/20 text-slate-200 rounded-bl-none shadow-md'
-                          }`}
-                        >
-                          <div className="whitespace-pre-line prose prose-invert prose-sm max-w-none">
-                            {msg.text ? (
-                              <>
-                                {msg.text}
-                                {isLoading && msg.id === messages[messages.length - 1]?.id && (
-                                  <span className="inline-block w-1.5 h-3.5 bg-cyan-400 ml-1 animate-pulse align-middle" />
-                                )}
-                              </>
-                            ) : (
-                              <div className="flex items-center gap-1.5 py-1">
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce" />
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]" />
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
                       </div>
-
-                      {/* Suggested Question Actions on Welcome */}
-                      {msg.suggestedActions && (
-                        <div className="mt-3 pl-9 flex flex-wrap gap-2">
-                          {msg.suggestedActions.map((action, aIdx) => (
-                            <button
-                              key={aIdx}
-                              onClick={() => handleSendMessage(action)}
-                              className="text-left text-xs px-3 py-1.5 rounded-lg bg-navy-900/90 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/50 hover:border-cyan-400 transition-colors flex items-center gap-1.5 shadow-sm"
-                            >
-                              <span>{action}</span>
-                              <ArrowRight className="w-3 h-3 shrink-0" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    ))
+                  )}
 
                   <div ref={messagesEndRef} />
                 </div>
@@ -929,8 +935,12 @@ What would you like to explore today?`,
                   {SUGGESTED_QUESTIONS.map((q, idx) => (
                     <button
                       key={idx}
-                      onClick={() => handleSendMessage(q)}
-                      className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40 transition-colors"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSendMessage(q);
+                      }}
+                      className="text-[11px] whitespace-nowrap px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 text-slate-400 hover:text-cyan-300 hover:border-cyan-500/40 transition-colors cursor-pointer"
                     >
                       {q}
                     </button>

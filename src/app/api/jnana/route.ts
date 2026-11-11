@@ -25,17 +25,17 @@ export async function POST(req: NextRequest) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey.trim());
 
-        // Fast streaming model with simple placeholder system instruction
+        // Ultra-fast streaming model with simple placeholder system instruction
         let streamResult = null;
         try {
           const model = genAI.getGenerativeModel({
-            model: 'gemini-3.8-flash',
+            model: 'gemini-3.5-flash-lite',
             systemInstruction: 'You are a helpful AI assistant.',
           });
           streamResult = await model.generateContentStream(message);
         } catch {
           const fallbackModel = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-3.8-flash',
             systemInstruction: 'You are a helpful AI assistant.',
           });
           streamResult = await fallbackModel.generateContentStream(message);
