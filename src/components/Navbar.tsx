@@ -61,6 +61,9 @@ export default function Navbar() {
   }, [pathname]);
 
   const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
+    } catch {}
     sessionStorage.removeItem('sarang_admin_auth');
     sessionStorage.removeItem('sarang_admin_email');
     sessionStorage.removeItem('sharang_admin_auth');

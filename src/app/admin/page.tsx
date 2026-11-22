@@ -100,11 +100,34 @@ export default function AdminDashboardPage() {
 
   // Check authentication
   useEffect(() => {
-    try {
-      const auth = sessionStorage.getItem('sarang_admin_auth') || sessionStorage.getItem('sharang_admin_auth');
-      if (auth === 'true') {
-        setIsAuthenticated(true);
-      } else {
+    let isMounted = true;
+
+    const checkAuth = async () => {
+      // 1. If sessionStorage is already set, resolve immediately
+      const clientAuth = sessionStorage.getItem('sarang_admin_auth') || sessionStorage.getItem('sharang_admin_auth');
+      if (clientAuth === 'true') {
+        if (isMounted) setIsAuthenticated(true);
+        return;
+      }
+
+      // 2. Otherwise verify server-side httpOnly session cookie
+      try {
+        const res = await fetch('/api/admin/session');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated && isMounted) {
+            sessionStorage.setItem('sarang_admin_auth', 'true');
+            if (data.email) sessionStorage.setItem('sarang_admin_email', data.email);
+            setIsAuthenticated(true);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Session verification error:', err);
+      }
+
+      // 3. If neither client nor server session is valid, redirect to login
+      if (isMounted) {
         setIsAuthenticated(false);
         try {
           router.replace('/admin/login');
@@ -112,10 +135,13 @@ export default function AdminDashboardPage() {
           window.location.assign('/admin/login');
         }
       }
-    } catch {
-      setIsAuthenticated(false);
-      window.location.assign('/admin/login');
-    }
+    };
+
+    checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   // Load data
@@ -151,7 +177,10 @@ export default function AdminDashboardPage() {
 
   const handleLogout = async () => {
     try {
-      // 1. Clear session and local storage authentication
+      // 1. Clear server-side httpOnly session cookie
+      await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
+
+      // 2. Clear session and local storage authentication
       sessionStorage.removeItem('sarang_admin_auth');
       sessionStorage.removeItem('sarang_admin_email');
       sessionStorage.removeItem('sharang_admin_auth');
@@ -161,15 +190,15 @@ export default function AdminDashboardPage() {
       localStorage.removeItem('sharang_admin_auth');
       localStorage.removeItem('sharang_admin_email');
 
-      // 2. Perform Supabase authentication sign-out
+      // 3. Perform Supabase authentication sign-out
       if (supabase) {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut().catch(() => {});
       }
     } catch (e) {
-      console.warn('Error during Supabase sign-out:', e);
+      console.warn('Error during sign-out:', e);
     } finally {
       setIsAuthenticated(false);
-      // 3. Automatically route the user back to the login screen
+      // 4. Route user back to login screen
       window.location.href = '/admin/login';
     }
   };

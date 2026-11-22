@@ -20,37 +20,36 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      // 1. If Supabase Auth is enabled, try supabase authentication
-      if (supabase && email) {
-        try {
-          const { data, error: authError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
+      // 1. Authenticate via secure server-side endpoint setting an httpOnly session cookie
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-          if (!authError && data?.session) {
-            sessionStorage.setItem('sarang_admin_auth', 'true');
-            sessionStorage.setItem('sarang_admin_email', email);
-            window.location.href = '/admin';
-            return;
-          }
-        } catch (authErr) {
-          console.warn('Supabase auth attempt error:', authErr);
-        }
-      }
+      const data = await res.json().catch(() => ({}));
 
-      // 2. Direct Admin Password check (Fallback or quick access)
-      const validPass = 'admin123';
-      if (password === validPass || password === 'sarang2026' || password === 'sharang2026') {
+      if (res.ok) {
+        // Synchronize client storage for immediate display in Admin header
         sessionStorage.setItem('sarang_admin_auth', 'true');
-        sessionStorage.setItem('sarang_admin_email', email || 'Vishal Kamath');
-        window.location.href = '/admin';
+        sessionStorage.setItem('sarang_admin_email', data.email || email || 'Vishal Kamath');
+
+        // Optional Supabase client session sync if account exists
+        if (supabase && email) {
+          try {
+            await supabase.auth.signInWithPassword({ email, password });
+          } catch {
+            // Non-blocking optional client sync
+          }
+        }
+
+        window.location.assign('/admin');
         return;
       }
 
-      setError('Invalid admin credentials. Please verify your password or Supabase account.');
+      setError(data.message || 'Invalid administrator credentials. Access denied.');
     } catch (err: any) {
-      setError(err?.message || 'Login failed. Please try again.');
+      setError(err?.message || 'Authentication request failed. Please check your connection.');
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +133,7 @@ export default function AdminLoginPage() {
                 />
               </div>
               <p className="mt-1.5 text-[11px] text-slate-500">
-                Default local passkey: <code className="text-cyan-400 font-mono">admin123</code>
+                Enter your configured master administrator passphrase.
               </p>
             </div>
 
