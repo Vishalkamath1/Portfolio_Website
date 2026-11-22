@@ -163,7 +163,7 @@ export default function HeroSection() {
                       width={360} 
                       height={360} 
                       priority
-                      className="max-h-[230px] sm:max-h-[260px] w-auto mx-auto object-contain drop-shadow-[0_15px_30px_rgba(6,182,212,0.5)] scale-105" 
+                      className="sarang-mascot-alive max-h-[230px] sm:max-h-[260px] w-auto mx-auto object-contain drop-shadow-[0_15px_30px_rgba(6,182,212,0.5)] scale-105" 
                     />
                   </div>
 

@@ -173,3 +173,24 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes sarang-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.sarang-mascot-alive {
+  animation: sarang-float 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sarang-mascot-alive {
+    animation: none;
+  }
+}
+
