@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { EDUCATION_CERTIFICATIONS } from '@/data/portfolioData';
 import { GraduationCap, Award, BookOpen, CheckCircle, Clock } from 'lucide-react';

@@ -9,42 +9,30 @@ import {
   saveProjectToDb, 
   deleteProjectFromDb, 
   fetchContactMessages, 
-  saveContactMessage,
   deleteContactMessage,
   ContactMessageRecord,
   fetchSarangReviews,
   deleteSarangReview,
-  isSupabaseConfigured,
   supabase
 } from '@/lib/supabaseClient';
 import { Project, ProjectCategory, ProjectStatus, PillarMode, SarangReview, normalizeProjectStatus } from '@/types';
 import { 
   FolderGit2, 
   Mail, 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
   LogOut, 
   Database, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
-  Lightbulb, 
   ExternalLink, 
   Copy, 
   Check, 
   RefreshCw,
-  Search,
-  Filter,
-  Layers,
-  Sparkles,
-  ArrowRight,
   Star
 } from 'lucide-react';
 import ProjectModal from '@/components/ProjectModal';
 import { BENCHMARK_EVALUATIONS } from '@/components/sections/SarangReviews';
+import AdminProjectsTab from '@/components/admin/AdminProjectsTab';
+import AdminInboxTab from '@/components/admin/AdminInboxTab';
+import AdminReviewsTab from '@/components/admin/AdminReviewsTab';
+import AdminDatabaseTab from '@/components/admin/AdminDatabaseTab';
 
 const CATEGORIES: ProjectCategory[] = [
   'GMC & GPA Underwriting AI',
@@ -53,12 +41,6 @@ const CATEGORIES: ProjectCategory[] = [
   'Insurance Analytics / Power BI',
   'Automation (Excel/Python)',
   'Experiments'
-];
-
-const PILLAR_MODES: { id: PillarMode; label: string; desc: string }[] = [
-  { id: 'Jnana Mode', label: 'Jnana Mode', desc: 'Knowledge, Chat & Specialist AI' },
-  { id: 'Karma Mode', label: 'Karma Mode', desc: 'Autonomous Execution & Processing' },
-  { id: 'Drishti Mode', label: 'Drishti Mode', desc: 'Risk Observatory & Auditing' },
 ];
 
 export default function AdminDashboardPage() {
@@ -356,6 +338,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+-- Migration for existing tables:
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode';
 
 CREATE TABLE IF NOT EXISTS public.contact_messages (
@@ -388,6 +371,7 @@ CREATE POLICY "Anyone can read contact messages" ON public.contact_messages FOR 
 
 DROP POLICY IF EXISTS "Authenticated users manage contact messages" ON public.contact_messages;
 CREATE POLICY "Authenticated users manage contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);`;
+
     navigator.clipboard.writeText(sql);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2500);
@@ -395,8 +379,24 @@ CREATE POLICY "Authenticated users manage contact messages" ON public.contact_me
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-navy-950 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-navy-950 flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow p-1">
+            <Image
+              src="/sarang-logo.webp"
+              alt="Sarang AI Logo"
+              fill
+              className="object-contain p-1"
+            />
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-bold text-white tracking-wider flex items-center justify-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <span>Verifying Admin Session...</span>
+            </div>
+            <p className="text-xs text-slate-500">Checking authenticated credentials</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -593,379 +593,40 @@ CREATE POLICY "Authenticated users manage contact messages" ON public.contact_me
 
         {/* TAB 1: PROJECTS MANAGEMENT */}
         {activeTab === 'projects' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-white">Project Library Manager</h3>
-                <p className="text-xs text-slate-400">
-                  Publish, edit, preview, or add new underwriting and AI automation prototypes.
-                </p>
-              </div>
-
-              <button
-                onClick={handleOpenNewProject}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-navy-950 font-bold text-xs tracking-wide shadow-cyan-glow hover:from-cyan-400 hover:to-blue-500 transition-all flex items-center gap-2 active:scale-95"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add New Project</span>
-              </button>
-            </div>
-
-            {/* Projects Table / Cards */}
-            <div className="grid grid-cols-1 gap-4">
-              {projects.map((proj) => (
-                <div
-                  key={proj.id}
-                  className="glass-card rounded-2xl p-5 border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
-                >
-                  <div className="space-y-2 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500/20">
-                        {proj.category}
-                      </span>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                        normalizeProjectStatus(proj.status) === 'Completed'
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
-                          : normalizeProjectStatus(proj.status) === 'In Progress'
-                          ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/30'
-                          : 'bg-amber-950 text-amber-400 border border-amber-500/30'
-                      }`}>
-                        {normalizeProjectStatus(proj.status) === 'Completed' ? 'Completed Prototype' : proj.status}
-                      </span>
-                      {proj.published ? (
-                        <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Live on Portfolio
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-semibold text-amber-400 flex items-center gap-1">
-                          <EyeOff className="w-3 h-3" /> Unpublished Draft
-                        </span>
-                      )}
-                    </div>
-
-                    <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
-                      {proj.title}
-                    </h4>
-
-                    <p className="text-xs text-slate-400 line-clamp-1 max-w-2xl">
-                      {proj.tagline}
-                    </p>
-
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {proj.tools.map((tool, idx) => (
-                        <span key={idx} className="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
-                          {tool}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Actions Column */}
-                  <div className="flex items-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800 w-full md:w-auto justify-end">
-                    <button
-                      onClick={() => setPreviewProject(proj)}
-                      className="p-2 rounded-lg glass-panel text-slate-300 hover:text-white"
-                      title="Preview Project Modal"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={() => handleTogglePublish(proj)}
-                      className={`p-2 rounded-lg text-xs font-semibold flex items-center gap-1 border ${
-                        proj.published
-                          ? 'bg-amber-950/40 border-amber-500/30 text-amber-300 hover:bg-amber-900/40'
-                          : 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/40'
-                      }`}
-                      title={proj.published ? 'Unpublish' : 'Publish'}
-                    >
-                      {proj.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      <span className="hidden sm:inline">{proj.published ? 'Hide' : 'Publish'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleOpenEditProject(proj)}
-                      className="p-2 rounded-lg glass-panel text-cyan-400 hover:text-cyan-300 border-cyan-500/30"
-                      title="Edit Project"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteProject(proj.id)}
-                      className="p-2 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-400 hover:text-rose-200"
-                      title="Delete Project"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <AdminProjectsTab
+            projects={projects}
+            onNewProject={handleOpenNewProject}
+            onEditProject={handleOpenEditProject}
+            onPreviewProject={(proj) => setPreviewProject(proj)}
+            onTogglePublish={handleTogglePublish}
+            onDeleteProject={handleDeleteProject}
+          />
         )}
 
         {/* TAB 2: CONTACT MESSAGES */}
         {activeTab === 'messages' && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-bold text-white">Contact & Recruiter Inquiries</h3>
-              <p className="text-xs text-slate-400">
-                Inquiries submitted via Section 7 of the public portfolio website.
-              </p>
-            </div>
-
-            {messages.length === 0 ? (
-              <div className="p-12 text-center glass-panel rounded-2xl max-w-md mx-auto">
-                <Mail className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                <p className="text-sm text-slate-300">No contact submissions received yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {messages.map((m) => (
-                  <div key={m.id} className="glass-card rounded-2xl p-5 border-slate-800 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                      <div>
-                        <div className="text-sm font-bold text-white flex items-center gap-2">
-                          <span>{m.name}</span>
-                          {m.company && (
-                            <span className="text-xs text-slate-400 font-normal">
-                              ({m.company})
-                            </span>
-                          )}
-                        </div>
-                        <a href={`mailto:${m.email}`} className="text-xs text-cyan-400 hover:underline">
-                          {m.email}
-                        </a>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold text-gold-400 bg-gold-950 px-2 py-0.5 rounded border border-gold-500/30">
-                          {m.interest || 'Underwriting'}
-                        </span>
-                        <span className="text-[11px] text-slate-500">
-                          {new Date(m.createdAt).toLocaleDateString()}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteMessage(m.id)}
-                          disabled={isDeletingMessage === m.id}
-                          className="px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1 disabled:opacity-50 ml-1"
-                          title="Delete this message"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>{isDeletingMessage === m.id ? 'Deleting...' : 'Delete'}</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line">
-                      {m.message}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <AdminInboxTab
+            messages={messages}
+            onDeleteMessage={handleDeleteMessage}
+            isDeletingMessage={isDeletingMessage}
+          />
         )}
 
-        {/* TAB: SARANG AI REVIEWS & RATINGS */}
+        {/* TAB 3: SARANG AI REVIEWS & RATINGS */}
         {activeTab === 'reviews' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Star className="w-5 h-5 text-gold-400 fill-gold-400" />
-                  <span>Sarang AI Reviews & Ratings Management</span>
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Inspect community evaluations, verify underwriting ratings, and moderate or delete reviews.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-navy-900 border border-slate-700 text-slate-300">
-                  Total Reviews: <strong className="text-white">{reviews.length}</strong>
-                </span>
-                <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gold-950/80 border border-gold-500/40 text-gold-300">
-                  Average Rating: <strong className="text-white">
-                    {reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : '5.0'} ★
-                  </strong>
-                </span>
-              </div>
-            </div>
-
-            {reviews.length === 0 ? (
-              <div className="p-12 text-center glass-panel rounded-2xl max-w-md mx-auto">
-                <Star className="w-8 h-8 text-slate-500 mx-auto mb-2" />
-                <p className="text-sm text-slate-300">No reviews have been submitted yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {reviews.map((rev) => (
-                  <div key={rev.id} className="glass-card rounded-2xl p-5 border-slate-800 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-                      <div>
-                        <div className="text-sm font-bold text-white flex items-center gap-2">
-                          <span>{rev.userName}</span>
-                          {rev.isBenchmark && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-950 text-gold-400 border border-gold-500/40">
-                              Creator Benchmark
-                            </span>
-                          )}
-                          {rev.userRole && (
-                            <span className="text-xs text-slate-400 font-normal">
-                              ({rev.userRole})
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 mt-1 text-gold-400">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
-                              key={s}
-                              className={`w-3.5 h-3.5 ${
-                                s <= rev.rating ? 'text-gold-400 fill-gold-400' : 'text-slate-700'
-                              }`}
-                            />
-                          ))}
-                          <span className="text-xs font-bold text-slate-300 ml-1">
-                            {rev.rating}.0
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <span className="text-[11px] text-slate-500">
-                          {(() => {
-                            try {
-                              const d = new Date(rev.createdAt);
-                              if (isNaN(d.getTime())) return rev.createdAt;
-                              const month = d.toLocaleDateString('en-US', { month: 'short' });
-                              const day = String(d.getDate()).padStart(2, '0');
-                              const year = d.getFullYear();
-                              return `${month} ${day}, ${year}`;
-                            } catch {
-                              return rev.createdAt;
-                            }
-                          })()}
-                        </span>
-
-                        {rev.isBenchmark ? (
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 bg-navy-900 border border-slate-800 cursor-default" title="Static creator benchmark test">
-                            Protected
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleDeleteReview(rev.id)}
-                            disabled={isDeletingReview === rev.id}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                            title="Delete this review permanently"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>{isDeletingReview === rev.id ? 'Deleting...' : 'Delete'}</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed pl-2 border-l-2 border-cyan-500/30">
-                      "{rev.reviewText}"
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <AdminReviewsTab
+            reviews={reviews}
+            onDeleteReview={handleDeleteReview}
+            isDeletingReview={isDeletingReview}
+          />
         )}
 
-        {/* TAB 3: DATABASE SCHEMA & INSTRUCTIONS */}
+        {/* TAB 4: DATABASE SCHEMA & INSTRUCTIONS */}
         {activeTab === 'database' && (
-          <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 border-cyan-500/30">
-            <div>
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Database className="w-5 h-5 text-cyan-400" />
-                <span>Supabase Database Schema Setup</span>
-              </h3>
-              <p className="text-xs text-slate-300 mt-1">
-                Your portfolio is configured to connect to your Supabase project: <code className="text-cyan-400 font-mono">https://rehnzcnlktcevrieosnj.supabase.co</code>
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-navy-950 border border-slate-800 space-y-3 text-xs text-slate-300">
-              <div className="font-bold text-white text-sm">How to finalize PostgreSQL tables in Supabase:</div>
-              <ol className="list-decimal pl-5 space-y-1.5 leading-relaxed">
-                <li>Log into your Supabase project at <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">supabase.com/dashboard</a>.</li>
-                <li>Navigate to the **SQL Editor** tab on the left sidebar.</li>
-                <li>Click **"New query"**, paste the SQL script below, and click **"Run"**.</li>
-                <li>That’s it! The tables (`projects`, `contact_messages`, `profile_content`) with Row Level Security (RLS) and initial seed data will be live immediately.</li>
-              </ol>
-            </div>
-
-            <div className="relative">
-              <button
-                onClick={copySqlToClipboard}
-                className="absolute top-3 right-3 px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-300 bg-cyan-950 border border-cyan-500/40 hover:bg-cyan-900 transition-colors flex items-center gap-1.5"
-              >
-                {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedSql ? 'Copied to Clipboard!' : 'Copy Complete SQL'}</span>
-              </button>
-
-              <pre className="p-4 rounded-xl bg-navy-950 border border-slate-800 text-[11px] font-mono text-slate-300 overflow-x-auto max-h-80 leading-relaxed">
-{`-- Execute in Supabase SQL Editor
-CREATE TABLE IF NOT EXISTS public.projects (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
-    tagline TEXT NOT NULL,
-    category TEXT NOT NULL,
-    pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode',
-    business_problem TEXT NOT NULL,
-    proposed_solution TEXT NOT NULL,
-    tools TEXT[] NOT NULL DEFAULT '{}',
-    business_impact TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'In Progress',
-    demo_url TEXT,
-    github_url TEXT,
-    image_url TEXT,
-    published BOOLEAN NOT NULL DEFAULT true,
-    featured BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
-);
-
--- Migration for existing tables:
-ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode';
-
-CREATE TABLE IF NOT EXISTS public.contact_messages (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    company TEXT,
-    interest TEXT DEFAULT 'GMC & GPA Underwriting',
-    message TEXT NOT NULL,
-    read BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
-);
-
-ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
-
--- Projects Policies
-DROP POLICY IF EXISTS "Public can view published projects" ON public.projects;
-CREATE POLICY "Public can view published projects" ON public.projects FOR SELECT TO anon, authenticated USING (published = true);
-
-DROP POLICY IF EXISTS "Authenticated users full access to projects" ON public.projects;
-CREATE POLICY "Authenticated users full access to projects" ON public.projects FOR ALL TO authenticated USING (true);
-
--- Contact Messages Policies
-DROP POLICY IF EXISTS "Anyone can insert contact message" ON public.contact_messages;
-CREATE POLICY "Anyone can insert contact message" ON public.contact_messages FOR INSERT TO anon, authenticated WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Anyone can read contact messages" ON public.contact_messages;
-CREATE POLICY "Anyone can read contact messages" ON public.contact_messages FOR SELECT TO anon, authenticated USING (true);
-
-DROP POLICY IF EXISTS "Authenticated users manage contact messages" ON public.contact_messages;
-CREATE POLICY "Authenticated users manage contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);`}
-              </pre>
-            </div>
-          </div>
+          <AdminDatabaseTab
+            copiedSql={copiedSql}
+            onCopySql={copySqlToClipboard}
+          />
         )}
 
       </main>

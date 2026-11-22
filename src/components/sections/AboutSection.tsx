@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { OWNER_PROFILE, CAREER_JOURNEY } from '@/data/portfolioData';
 import { Shield, Briefcase, Zap, CheckCircle2, FileSpreadsheet, Sparkles, TrendingUp, Cpu } from 'lucide-react';
