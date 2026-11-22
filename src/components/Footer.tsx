@@ -26,7 +26,7 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <div className="relative w-11 h-11 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
                 <Image
-                  src="/Sarang%20New%20Logo.png"
+                  src="/sarang-logo.webp"
                   alt="Sarang AI Agent Logo"
                   fill
                   className="object-contain p-1"

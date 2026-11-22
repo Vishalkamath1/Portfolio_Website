@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('Contact API error:', err);
     return NextResponse.json(
-      { error: 'Server error processing contact submission. Please try again or email directly at vishalkamath8@gmail.com.' },
+      { error: 'Server error processing contact submission. Please try again or email directly at kamathvishal109@gmail.com.' },
       { status: 500 }
     );
   }

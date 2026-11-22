@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
         <Link href="/" className="inline-flex items-center gap-3 group mb-6">
           <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow group-hover:border-gold-400 transition-colors shrink-0">
             <Image
-              src="/Sarang%20New%20Logo.png"
+              src="/sarang-logo.webp"
               alt="Sarang AI Agent Logo"
               fill
               className="object-contain p-1"

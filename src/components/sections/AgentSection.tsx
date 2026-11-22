@@ -875,7 +875,7 @@ Feel free to ask more specific questions regarding:
                 <div className="flex items-center gap-4 mb-4">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
                     <Image
-                      src="/Sarang%20New%20Logo.png"
+                      src="/sarang-logo.webp"
                       alt="Sarang AI Agent Logo"
                       fill
                       className="object-contain p-1"
@@ -984,7 +984,7 @@ Feel free to ask more specific questions regarding:
                   <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
                       <Image
-                        src="/Sarang%20New%20Logo.png"
+                        src="/sarang-logo.webp"
                         alt="Sarang AI Agent Logo"
                         fill
                         className="object-contain p-1"
@@ -1039,7 +1039,7 @@ Feel free to ask more specific questions regarding:
                     <div className="h-full min-h-[180px] flex flex-col items-center justify-center text-center p-6 text-slate-400">
                       <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow mb-3">
                         <Image
-                          src="/Sarang%20New%20Logo.png"
+                          src="/sarang-logo.webp"
                           alt="Sarang AI Agent Logo"
                           fill
                           className="object-contain p-1"
@@ -1063,7 +1063,7 @@ Feel free to ask more specific questions regarding:
                           {msg.sender === 'sarang' && (
                             <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-sm shrink-0">
                               <Image
-                                src="/Sarang%20New%20Logo.png"
+                                src="/sarang-logo.webp"
                                 alt="Sarang AI Agent Logo"
                                 fill
                                 className="object-contain p-0.5"

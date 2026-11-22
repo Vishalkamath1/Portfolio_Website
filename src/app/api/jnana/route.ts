@@ -275,11 +275,15 @@ export async function POST(req: NextRequest) {
       return new Response('Invalid JSON payload received', { status: 400 });
     }
 
-    const { message, mode, chatHistory } = body;
-
-    if (!message || typeof message !== 'string') {
+    const rawMessage = body?.message;
+    if (!rawMessage || typeof rawMessage !== 'string' || !rawMessage.trim()) {
       return new Response('Valid message string is required', { status: 400 });
     }
+
+    const message = rawMessage.trim().slice(0, 4000);
+    const mode = body?.mode;
+    const rawChatHistory = body?.chatHistory;
+    const chatHistory = Array.isArray(rawChatHistory) ? rawChatHistory.slice(-10) : [];
 
     const apiKey = process.env.GEMINI_API_KEY;
     const systemPrompt = buildSystemPrompt(mode);

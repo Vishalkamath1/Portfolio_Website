@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['lh3.googleusercontent.com', 'images.unsplash.com'],
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
   },
   experimental: {
     outputFileTracingIncludes: {

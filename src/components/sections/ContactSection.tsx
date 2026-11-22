@@ -110,7 +110,7 @@ export default function ContactSection() {
       clearTimeout(timeoutId);
       setStatus('error');
       if (err.name === 'AbortError') {
-        setErrorMessage('Connection timed out. Please check your network or email directly at vishalkamath8@gmail.com.');
+        setErrorMessage('Connection timed out. Please check your network or email directly at kamathvishal109@gmail.com.');
       } else {
         setErrorMessage(err.message || 'An unexpected error occurred while transmitting your message.');
       }
@@ -357,8 +357,8 @@ export default function ContactSection() {
                         <span className="font-semibold block">{errorMessage}</span>
                         <span className="text-[11px] text-rose-300/80 block">
                           You can also reach out directly via email at{' '}
-                          <a href="mailto:vishalkamath8@gmail.com" className="underline font-bold text-white hover:text-cyan-300">
-                            vishalkamath8@gmail.com
+                          <a href="mailto:kamathvishal109@gmail.com" className="underline font-bold text-white hover:text-cyan-300">
+                            kamathvishal109@gmail.com
                           </a>
                         </span>
                       </div>

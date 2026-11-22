@@ -23,6 +23,11 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const getNavHref = (href: string) => {
+    if (!href.startsWith('#')) return href;
+    return pathname === '/' ? href : `/${href}`;
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -93,13 +98,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Brand Logo */}
-          <Link href="#hero" className="flex items-center gap-3 group">
+          <Link href={getNavHref('#hero')} className="flex items-center gap-3 group">
             <div 
               style={{ transform: 'translateZ(0)', isolation: 'isolate' }}
               className="relative w-11 h-11 rounded-xl overflow-hidden ring-1 ring-inset ring-cyan-500/40 bg-cyan-950 shadow-[0_0_15px_rgba(6,182,212,0.25)] group-hover:ring-gold-400 transition-colors shrink-0 transform-gpu isolate"
             >
               <Image
-                src="/Sarang%20New%20Logo.png"
+                src="/sarang-logo.webp"
                 alt="Sarang AI Agent Logo"
                 fill
                 className="object-contain p-1"
@@ -124,7 +129,7 @@ export default function Navbar() {
                 return (
                   <div key={link.name} className="relative group px-1">
                     <Link
-                      href={link.href}
+                      href={getNavHref(link.href)}
                       className="relative group transition-all duration-300 px-4 py-1.5 text-xs font-semibold rounded-full text-cyan-300 bg-cyan-950/70 border border-cyan-400/80 hover:bg-cyan-900/60 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
                     >
                       <Bot className="w-4 h-4 text-cyan-400" />
@@ -137,7 +142,7 @@ export default function Navbar() {
               return (
                 <Link
                   key={link.name}
-                  href={link.href}
+                  href={getNavHref(link.href)}
                   className="px-3.5 py-1.5 text-sm font-medium rounded-md nav-link-transition text-slate-300 hover:text-cyan-400 hover:bg-slate-800/40"
                 >
                   {link.name}
@@ -209,7 +214,7 @@ export default function Navbar() {
           {NAV_LINKS.map((link) => (
             <Link
               key={link.name}
-              href={link.href}
+              href={getNavHref(link.href)}
               onClick={() => setIsOpen(false)}
               className={`flex items-center px-4 py-3 min-h-[44px] rounded-md text-base font-medium transition-colors ${
                 link.highlight

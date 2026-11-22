@@ -158,7 +158,7 @@ export default function HeroSection() {
                   {/* Character Image with CSS Mask to Dissolve Black Canvas Box */}
                   <div className="relative z-10 flex items-center justify-center mix-blend-screen [mask-image:radial-gradient(circle_at_center,black_60%,transparent_100%)]">
                     <Image 
-                      src="/sarang-warrior-fixed.png" 
+                      src="/sarang-warrior.webp" 
                       alt="Sarang AI Agent" 
                       width={360} 
                       height={360} 
