@@ -24,12 +24,13 @@ export default function Footer() {
           {/* Col 1: Brand & Slogan */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-cyan-400/40 shadow-cyan-glow">
+              <div className="relative w-11 h-11 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
                 <Image
-                  src="/images/sarang-avatar.jpg"
-                  alt="SARANG AI"
+                  src="/Sarang%20New%20Logo.png"
+                  alt="Sarang AI Agent Logo"
                   fill
-                  className="object-cover"
+                  className="object-contain p-1"
+                  sizes="44px"
                 />
               </div>
               <span className="text-xl font-black tracking-wider text-white">

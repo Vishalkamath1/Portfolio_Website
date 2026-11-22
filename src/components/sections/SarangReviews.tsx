@@ -16,12 +16,38 @@ import {
 import { SarangReview } from '@/types';
 import { fetchSarangReviews, saveSarangReview } from '@/lib/supabaseClient';
 
+export const BENCHMARK_EVALUATIONS: SarangReview[] = [
+  {
+    id: 'benchmark-gpa-claims',
+    userName: 'Developer Evaluation (Vishal Kamath)',
+    userRole: 'GPA Claims Helpdesk · Benchmark Test',
+    rating: 5,
+    reviewText: 'Stress-tested against rejected Permanent Partial Disablement (PPD) and Temporary Total Disablement (TTD) cases. Maps medical findings to IRDAI disability grids and generates multi-tier grievance escalations.',
+    createdAt: '2026-11-10T14:30:00.000Z',
+    isBenchmark: true
+  },
+  {
+    id: 'benchmark-irdai-decoder',
+    userName: 'Developer Evaluation (Vishal Kamath)',
+    userRole: 'IRDAI Circular Decoder · Benchmark Test',
+    rating: 5,
+    reviewText: 'Verified on IRDAI Health Insurance Master Circular mandates—translates 1-hour cashless pre-auth, 3-hour discharge timelines, and 5-year moratorium rules into plain-English underwriting matrices.',
+    createdAt: '2026-11-08T09:15:00.000Z',
+    isBenchmark: true
+  }
+];
+
 export default function SarangReviews() {
   const [reviews, setReviews] = useState<SarangReview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Combine live Supabase reviews with developer benchmark evaluations
+  const allReviews = React.useMemo(() => {
+    return [...reviews, ...BENCHMARK_EVALUATIONS];
+  }, [reviews]);
 
   // Form State
   const [rating, setRating] = useState<number>(5);
@@ -93,14 +119,14 @@ export default function SarangReviews() {
     }
   };
 
-  // Calculations for average & distribution
-  const totalCount = reviews.length;
+  // Calculations for average & distribution based on allReviews
+  const totalCount = allReviews.length;
   const averageRating = totalCount > 0 
-    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalCount).toFixed(1)
+    ? (allReviews.reduce((acc, r) => acc + r.rating, 0) / totalCount).toFixed(1)
     : '5.0';
 
   const distribution = [5, 4, 3, 2, 1].map((stars) => {
-    const count = reviews.filter((r) => r.rating === stars).length;
+    const count = allReviews.filter((r) => r.rating === stars).length;
     const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : (stars === 5 ? 100 : 0);
     return { stars, count, percentage };
   });
@@ -118,15 +144,23 @@ export default function SarangReviews() {
 
   const formatDate = (isoString: string) => {
     try {
+      if (!isoString) return 'Recently';
+      if (/^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/.test(isoString)) {
+        return isoString;
+      }
       const d = new Date(isoString);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      if (isNaN(d.getTime())) return isoString;
+      const month = d.toLocaleDateString('en-US', { month: 'short' });
+      const day = String(d.getDate()).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${month} ${day}, ${year}`;
     } catch {
       return 'Recently';
     }
   };
 
   return (
-    <div className="mt-16 pt-16 border-t border-slate-800/80">
+    <div id="sarang-reviews" className="mt-12 pt-10 border-t border-slate-800/80 scroll-mt-20">
       {/* Section Sub-Header */}
       <div className="text-center max-w-2xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border border-cyan-400/30 text-cyan-300 text-xs font-semibold uppercase tracking-widest mb-3 shadow-cyan-glow">
@@ -330,7 +364,7 @@ export default function SarangReviews() {
           <div className="flex items-center justify-between pb-2 border-b border-slate-800">
             <h4 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
-              <span>Recent Underwriter Reviews ({reviews.length})</span>
+              <span>Recent Professional Evaluations ({allReviews.length})</span>
             </h4>
             <span className="text-xs text-slate-400 font-medium">Sorted by recency</span>
           </div>
@@ -340,13 +374,13 @@ export default function SarangReviews() {
               <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
               <span className="text-xs">Loading verified reviews...</span>
             </div>
-          ) : reviews.length === 0 ? (
+          ) : allReviews.length === 0 ? (
             <div className="p-8 text-center glass-card rounded-2xl border-slate-800 text-slate-400 text-xs">
               No reviews yet. Be the first to evaluate Sarang AI!
             </div>
           ) : (
             <div className="space-y-3.5">
-              {reviews.map((rev) => {
+              {allReviews.map((rev) => {
                 const initials = rev.userName
                   .split(' ')
                   .map((w) => w[0])

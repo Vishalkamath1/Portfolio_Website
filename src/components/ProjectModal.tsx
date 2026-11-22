@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import { Project } from '@/types';
+import React, { useEffect } from 'react';
+import { Project, normalizeProjectStatus } from '@/types';
 import { X, ExternalLink, Github, CheckCircle, Clock, Lightbulb, AlertTriangle, Cpu, TrendingUp } from 'lucide-react';
+import { useAgentChat } from '@/context/AgentChatContext';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -10,10 +11,25 @@ interface ProjectModalProps {
 }
 
 export default function ProjectModal({ project, onClose }: ProjectModalProps) {
+  const { openSpecialistChat } = useAgentChat();
+
+  // Accessibility: Keyboard Escape handler
+  useEffect(() => {
+    if (!project) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [project, onClose]);
+
   if (!project) return null;
 
-  const getStatusBadge = (status: Project['status']) => {
-    switch (status) {
+  const getStatusBadge = (status: Project['status'] | string) => {
+    const normalized = normalizeProjectStatus(status);
+    switch (normalized) {
       case 'Completed':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
@@ -40,16 +56,23 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+      role="presentation"
+    >
       <div 
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto glass-panel-glow rounded-2xl border border-cyan-500/30 shadow-2xl p-6 sm:p-8 space-y-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+        className="relative w-full max-w-3xl max-h-[90vh] max-h-[90dvh] overflow-y-auto glass-panel-glow rounded-2xl border border-cyan-500/30 shadow-2xl p-6 sm:p-8 space-y-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-lg bg-navy-950/80 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          aria-label="Close modal"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 w-11 h-11 min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center rounded-lg bg-navy-950/80 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+          aria-label="Close project modal"
         >
           <X className="w-5 h-5" />
         </button>
@@ -61,12 +84,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               {project.category}
             </span>
             {getStatusBadge(project.status)}
-            <span className="text-[11px] text-amber-400/90 bg-amber-950/50 border border-amber-500/20 px-2 py-0.5 rounded">
-              Demonstration Model
-            </span>
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+          <h3 id="project-modal-title" className="text-2xl sm:text-3xl font-black text-white leading-tight">
             {project.title}
           </h3>
 
@@ -80,7 +100,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           <div className="p-4 rounded-xl bg-navy-950/90 border border-rose-500/20 space-y-2">
             <div className="flex items-center gap-2 text-rose-400 text-xs font-bold uppercase tracking-wider">
               <AlertTriangle className="w-4 h-4" />
-              <span>The Underwriting Challenge</span>
+              <span>Current Challenge</span>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               {project.businessProblem}
@@ -135,14 +155,19 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-800">
           <div className="flex gap-3">
             {project.demoUrl && (
-              <a
-                href={project.demoUrl}
-                onClick={onClose}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                  openSpecialistChat(project.id, { forceScroll: true });
+                }}
                 className="px-4 py-2 rounded-lg bg-cyan-500 text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-cyan-glow hover:bg-cyan-400 transition-colors"
               >
                 <span>Live Interactive Demo</span>
                 <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              </button>
             )}
             {project.githubUrl && (
               <a

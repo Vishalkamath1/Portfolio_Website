@@ -56,15 +56,47 @@ export default function ContactSection() {
     setStatus('submitting');
     setErrorMessage('');
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout max
+
     try {
-      // Simulate or send to backend route
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
-      // Even if API route is in demo mode, show instant smooth success
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to transmit message. Please try again or email directly.');
+      }
+
+      // Persist to client local storage so admin panel on this browser immediately reflects the new inquiry
+      try {
+        const LOCAL_MESSAGES_KEY = 'sarang_ai_local_messages';
+        const saved = localStorage.getItem(LOCAL_MESSAGES_KEY);
+        const list = saved ? JSON.parse(saved) : [];
+        const newRecord = data.record || {
+          id: 'msg-' + Date.now(),
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          company: formData.company.trim(),
+          interest: formData.interest,
+          message: formData.message.trim(),
+          read: false,
+          createdAt: new Date().toISOString()
+        };
+        if (!list.some((m: any) => m.id === newRecord.id)) {
+          list.unshift(newRecord);
+          localStorage.setItem(LOCAL_MESSAGES_KEY, JSON.stringify(list));
+        }
+      } catch (storageErr) {
+        // Ignore localStorage error
+      }
+
       setStatus('success');
       setFormData({
         name: '',
@@ -74,9 +106,14 @@ export default function ContactSection() {
         message: '',
         honeypot: ''
       });
-    } catch (err) {
-      // Graceful local handling
-      setStatus('success');
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      setStatus('error');
+      if (err.name === 'AbortError') {
+        setErrorMessage('Connection timed out. Please check your network or email directly at vishalkamath8@gmail.com.');
+      } else {
+        setErrorMessage(err.message || 'An unexpected error occurred while transmitting your message.');
+      }
     }
   };
 
@@ -314,9 +351,17 @@ export default function ContactSection() {
 
                   {/* Error state */}
                   {status === 'error' && (
-                    <div className="p-3 rounded-lg bg-rose-950/40 border border-rose-500/30 flex items-center gap-2 text-xs text-rose-300">
-                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                      <span>{errorMessage}</span>
+                    <div className="p-3.5 rounded-xl bg-rose-950/70 border border-rose-500/40 flex items-start gap-2.5 text-xs text-rose-300 animate-in fade-in">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <span className="font-semibold block">{errorMessage}</span>
+                        <span className="text-[11px] text-rose-300/80 block">
+                          You can also reach out directly via email at{' '}
+                          <a href="mailto:vishalkamath8@gmail.com" className="underline font-bold text-white hover:text-cyan-300">
+                            vishalkamath8@gmail.com
+                          </a>
+                        </span>
+                      </div>
                     </div>
                   )}
 

@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { INITIAL_PROJECTS } from '@/data/portfolioData';
 import { fetchProjectsFromDb } from '@/lib/supabaseClient';
-import { Project } from '@/types';
+import { Project, normalizeProjectStatus } from '@/types';
 import ProjectModal from '@/components/ProjectModal';
+import { useAgentChat, AGENT_GREETINGS } from '@/context/AgentChatContext';
 import { 
   FolderGit2, 
   ArrowRight, 
@@ -15,8 +16,25 @@ import {
 } from 'lucide-react';
 
 export default function ProjectsSection() {
+  const { openSpecialistChat } = useAgentChat();
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+  const handleProjectChat = (project: Project) => {
+    let targetAgentId = "gmc-gpa-knowledge-hub"; // fallback
+    if (project.agentId && (project.agentId in AGENT_GREETINGS)) {
+      targetAgentId = project.agentId;
+    } else if (project.title.includes("GPA Claims") || project.id === 'gpa-claims-helpdesk') {
+      targetAgentId = "gpa-claims-helpdesk";
+    } else if (project.title.includes("IRDAI Health") || project.id === 'irdai-health-decoder') {
+      targetAgentId = "irdai-health-decoder";
+    } else if (project.title.includes("Insurance AI") || project.id === 'insurance-ai-architect') {
+      targetAgentId = "insurance-ai-architect";
+    } else if (project.title.includes("GMC & GPA Knowledge") || project.id === 'gmc-gpa-knowledge-hub') {
+      targetAgentId = "gmc-gpa-knowledge-hub";
+    }
+    openSpecialistChat(targetAgentId, { forceScroll: true });
+  };
 
   useEffect(() => {
     async function loadProjects() {
@@ -30,17 +48,32 @@ export default function ProjectsSection() {
       }
     }
     loadProjects();
+
+    const handleUpdate = () => {
+      loadProjects();
+    };
+
+    window.addEventListener('sarang_projects_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('sarang_projects_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   const publishedProjects = projects.filter((p) => p.published !== false);
 
-  const getStatusBadge = (status: Project['status']) => {
-    switch (status) {
+  const getStatusBadge = (status: Project['status'] | string) => {
+    const normalized = normalizeProjectStatus(status);
+    const isPrototype = String(status || '').toLowerCase().includes('prototype');
+    const label = isPrototype ? 'Completed Prototype' : 'Completed';
+
+    switch (normalized) {
       case 'Completed':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-950/80 border border-emerald-500/40 text-emerald-400">
             <CheckCircle2 className="w-3 h-3" />
-            Completed
+            {label}
           </span>
         );
       case 'In Progress':
@@ -97,8 +130,8 @@ export default function ProjectsSection() {
             {publishedProjects.map((project) => (
               <div
                 key={project.id}
+                onClick={() => handleProjectChat(project)}
                 className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:border-cyan-400/50 hover:shadow-cyan-glow transition-all group cursor-pointer"
-                onClick={() => setSelectedProject(project)}
               >
                 <div>
                   {/* Category & Status Bar */}
@@ -147,12 +180,29 @@ export default function ProjectsSection() {
 
                 {/* Card Action Footer */}
                 <div className="pt-4 border-t border-slate-800/70 flex items-center justify-between text-xs">
-                  <span className="text-cyan-400 font-semibold flex items-center gap-1 group-hover:text-cyan-300">
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedProject(project);
+                    }}
+                    className="text-cyan-400 font-semibold flex items-center gap-1 group-hover:text-cyan-300 cursor-pointer"
+                  >
                     Inspect Details <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                  <span className="text-[11px] text-slate-500">
-                    Demo Concept
-                  </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleProjectChat(project);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-md shadow-[0_0_10px_rgba(52,211,153,0.15)]"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Demonstrate Live
+                  </button>
                 </div>
               </div>
             ))}

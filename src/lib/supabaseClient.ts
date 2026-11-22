@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Project, ProjectCategory, SarangReview } from '@/types';
 import { INITIAL_PROJECTS, OWNER_PROFILE } from '@/data/portfolioData';
+import { resolveAgentId } from '@/context/AgentChatContext';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -30,46 +31,60 @@ const LOCAL_REVIEWS_KEY = 'sarang_ai_local_reviews';
 export async function fetchProjectsFromDb(): Promise<{ projects: Project[]; isDbLive: boolean }> {
   if (supabase) {
     try {
-      const { data, error } = await supabase
+      const fetchPromise = supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
+      const timeoutPromise = new Promise<{ data: any; error: any }>((_, reject) =>
+        setTimeout(() => reject(new Error('Supabase projects fetch timeout')), 2500)
+      );
+
+      const { data, error } = (await Promise.race([fetchPromise, timeoutPromise])) as any;
 
       if (!error && data && data.length > 0) {
         // Map database snake_case to Project interface
-        const mapped: Project[] = data.map((d: any) => ({
-          id: d.id,
-          title: d.title,
-          tagline: d.tagline,
-          category: d.category as ProjectCategory,
-          businessProblem: d.business_problem,
-          proposedSolution: d.proposed_solution,
-          tools: d.tools || [],
-          businessImpact: d.business_impact,
-          status: d.status,
-          demoUrl: d.demo_url,
-          githubUrl: d.github_url,
-          imageUrl: d.image_url,
-          published: d.published,
-          featured: d.featured,
-          createdAt: d.created_at,
-        }));
+        const mapped: Project[] = data.map((d: any) => {
+          const resolvedId = resolveAgentId(d.id) || resolveAgentId(d.title) || d.id;
+
+          return {
+            id: resolvedId,
+            title: d.title,
+            tagline: d.tagline,
+            category: d.category as ProjectCategory,
+            pillarMode: 'Jnana Mode' as const,
+            businessProblem: d.business_problem,
+            proposedSolution: d.proposed_solution,
+            tools: d.tools || [],
+            businessImpact: d.business_impact,
+            status: d.status,
+            demoUrl: d.demo_url,
+            githubUrl: d.github_url,
+            imageUrl: d.image_url,
+            published: d.published,
+            featured: d.featured,
+            createdAt: d.created_at,
+            agentId: resolvedId,
+          };
+        });
         return { projects: mapped, isDbLive: true };
       }
     } catch (e) {
-      console.warn('Supabase query error, falling back to local store:', e);
+      console.warn('Supabase query error, falling back to initial projects:', e);
     }
   }
 
-  // Fallback to localStorage (browser) or INITIAL_PROJECTS (server)
+  // Fallback to local storage persistence when Supabase table is offline or empty
   if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem(LOCAL_PROJECTS_KEY);
-    if (saved) {
-      try {
-        return { projects: JSON.parse(saved), isDbLive: false };
-      } catch (e) {
-        // ignore parse error
+    try {
+      const saved = localStorage.getItem(LOCAL_PROJECTS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return { projects: parsed, isDbLive: false };
+        }
       }
+    } catch (e) {
+      console.warn('Local storage fallback read error:', e);
     }
   }
 
@@ -83,6 +98,7 @@ export async function saveProjectToDb(project: Partial<Project>): Promise<{ succ
     title: project.title || 'Untitled Project',
     tagline: project.tagline || '',
     category: project.category || 'GMC & GPA Underwriting AI',
+    pillarMode: project.pillarMode || 'Jnana Mode',
     businessProblem: project.businessProblem || '',
     proposedSolution: project.proposedSolution || '',
     tools: project.tools || [],
@@ -99,11 +115,12 @@ export async function saveProjectToDb(project: Partial<Project>): Promise<{ succ
   // Try saving to Supabase if configured
   if (supabase) {
     try {
-      const dbPayload = {
+      const dbPayload: any = {
         id: projectToSave.id,
         title: projectToSave.title,
         tagline: projectToSave.tagline,
         category: projectToSave.category,
+        pillar_mode: projectToSave.pillarMode || 'Jnana Mode',
         business_problem: projectToSave.businessProblem,
         proposed_solution: projectToSave.proposedSolution,
         tools: projectToSave.tools,
@@ -116,9 +133,19 @@ export async function saveProjectToDb(project: Partial<Project>): Promise<{ succ
         featured: projectToSave.featured,
       };
 
-      const { data, error } = isNew
+      let { data, error } = isNew
         ? await supabase.from('projects').insert([dbPayload]).select()
         : await supabase.from('projects').update(dbPayload).eq('id', projectToSave.id).select();
+
+      // Gracefully handle if Supabase projects table has not yet run the pillar_mode ALTER TABLE
+      if (error && error.message && error.message.includes('pillar_mode')) {
+        const { pillar_mode, ...legacyPayload } = dbPayload;
+        const retryRes = isNew
+          ? await supabase.from('projects').insert([legacyPayload]).select()
+          : await supabase.from('projects').update(legacyPayload).eq('id', projectToSave.id).select();
+        data = retryRes.data;
+        error = retryRes.error;
+      }
 
       if (!error && data && data.length > 0) {
         return { success: true, project: projectToSave };
@@ -138,6 +165,7 @@ export async function saveProjectToDb(project: Partial<Project>): Promise<{ succ
       list = list.map((p) => (p.id === projectToSave.id ? projectToSave : p));
     }
     localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(list));
+    window.dispatchEvent(new CustomEvent('sarang_projects_updated', { detail: { project: projectToSave } }));
   }
 
   return { success: true, project: projectToSave };
@@ -158,6 +186,7 @@ export async function deleteProjectFromDb(id: string): Promise<boolean> {
     const list: Project[] = saved ? JSON.parse(saved) : [...INITIAL_PROJECTS];
     const updated = list.filter((p) => p.id !== id);
     localStorage.setItem(LOCAL_PROJECTS_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('sarang_projects_updated', { detail: { id } }));
   }
 
   return true;
@@ -179,15 +208,22 @@ export interface ContactMessageRecord {
 }
 
 export async function fetchContactMessages(): Promise<ContactMessageRecord[]> {
+  let dbMessages: ContactMessageRecord[] = [];
+
   if (supabase) {
     try {
-      const { data, error } = await supabase
+      const fetchPromise = supabase
         .from('contact_messages')
         .select('*')
         .order('created_at', { ascending: false });
+      const timeoutPromise = new Promise<{ data: any; error: any }>((_, reject) =>
+        setTimeout(() => reject(new Error('Supabase fetch timeout')), 2500)
+      );
 
-      if (!error && data) {
-        return data.map((d: any) => ({
+      const { data, error } = (await Promise.race([fetchPromise, timeoutPromise])) as any;
+
+      if (!error && data && Array.isArray(data) && data.length > 0) {
+        dbMessages = data.map((d: any) => ({
           id: d.id,
           name: d.name,
           email: d.email,
@@ -195,21 +231,35 @@ export async function fetchContactMessages(): Promise<ContactMessageRecord[]> {
           interest: d.interest,
           message: d.message,
           read: d.read,
-          createdAt: d.created_at,
+          createdAt: d.created_at || new Date().toISOString(),
         }));
       }
     } catch (e) {
-      // fallback
+      console.warn('[Supabase] fetchContactMessages fallback:', e);
     }
   }
 
+  // Backup persistence: load local messages to ensure submitted inquiries are visible
+  let localMessages: ContactMessageRecord[] = [];
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(LOCAL_MESSAGES_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        localMessages = JSON.parse(saved);
       } catch (e) {}
     }
+  }
+
+  // Merge unique by ID
+  const map = new Map<string, ContactMessageRecord>();
+  dbMessages.forEach((m) => map.set(m.id, m));
+  localMessages.forEach((m) => {
+    if (!map.has(m.id)) map.set(m.id, m);
+  });
+
+  const combined = Array.from(map.values());
+  if (combined.length > 0) {
+    return combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   return [
@@ -236,9 +286,20 @@ export async function fetchContactMessages(): Promise<ContactMessageRecord[]> {
   ];
 }
 
-export async function saveContactMessage(msg: Omit<ContactMessageRecord, 'id' | 'createdAt'>): Promise<boolean> {
+export async function saveContactMessage(
+  msg: Omit<ContactMessageRecord, 'id' | 'createdAt'>
+): Promise<{ success: boolean; record: ContactMessageRecord; error?: string }> {
+  const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+  let generatedId: string | undefined = undefined;
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    try {
+      generatedId = crypto.randomUUID();
+    } catch {}
+  }
+
   const newRecord: ContactMessageRecord = {
-    id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'msg-' + Date.now(),
+    id: generatedId || ('msg-' + Date.now()),
     ...msg,
     read: false,
     createdAt: new Date().toISOString(),
@@ -246,30 +307,71 @@ export async function saveContactMessage(msg: Omit<ContactMessageRecord, 'id' | 
 
   if (supabase) {
     try {
-      const { error } = await supabase.from('contact_messages').insert([
-        {
-          id: newRecord.id,
-          name: newRecord.name,
-          email: newRecord.email,
-          company: newRecord.company,
-          interest: newRecord.interest,
-          message: newRecord.message,
-          read: false,
-        }
-      ]);
-      if (!error) return true;
-    } catch (e) {
-      // fallback
+      const insertRow: any = {
+        name: newRecord.name,
+        email: newRecord.email,
+        company: newRecord.company,
+        interest: newRecord.interest,
+        message: newRecord.message,
+        read: false,
+      };
+
+      // Only pass UUID id if valid to satisfy PostgreSQL UUID constraint
+      if (generatedId && isUuid(generatedId)) {
+        insertRow.id = generatedId;
+      }
+
+      // Fast race with 800ms guard so database latency never hangs the API
+      const insertPromise = Promise.resolve(supabase.from('contact_messages').insert([insertRow]))
+        .then(({ error }: any) => {
+          if (error) console.warn('[Supabase] contact_messages insert notice:', error.message || error);
+          return { error };
+        })
+        .catch((err: any) => {
+          console.warn('[Supabase] contact_messages insert notice:', err.message || err);
+          return { error: err };
+        });
+
+      const timeoutPromise = new Promise<{ error: null }>((resolve) =>
+        setTimeout(() => resolve({ error: null }), 800)
+      );
+
+      await Promise.race([insertPromise, timeoutPromise]);
+    } catch (e: any) {
+      console.warn('[Supabase] contact_messages insert notice:', e.message || e);
     }
   }
 
   if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem(LOCAL_MESSAGES_KEY);
-    const list: ContactMessageRecord[] = saved ? JSON.parse(saved) : [];
-    list.unshift(newRecord);
-    localStorage.setItem(LOCAL_MESSAGES_KEY, JSON.stringify(list));
+    try {
+      const saved = localStorage.getItem(LOCAL_MESSAGES_KEY);
+      const list: ContactMessageRecord[] = saved ? JSON.parse(saved) : [];
+      list.unshift(newRecord);
+      localStorage.setItem(LOCAL_MESSAGES_KEY, JSON.stringify(list));
+    } catch {}
   }
 
+  return { success: true, record: newRecord };
+}
+
+export async function deleteContactMessage(id: string): Promise<boolean> {
+  if (supabase) {
+    try {
+      await supabase.from('contact_messages').delete().eq('id', id);
+    } catch (e) {
+      console.warn('[Supabase] deleteContactMessage notice:', e);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_MESSAGES_KEY);
+      if (saved) {
+        const list: ContactMessageRecord[] = JSON.parse(saved);
+        const filtered = list.filter((m) => m.id !== id);
+        localStorage.setItem(LOCAL_MESSAGES_KEY, JSON.stringify(filtered));
+      }
+    } catch {}
+  }
   return true;
 }
 
@@ -307,10 +409,15 @@ export const INITIAL_REVIEWS: SarangReview[] = [
 export async function fetchSarangReviews(): Promise<SarangReview[]> {
   if (supabase) {
     try {
-      const { data, error } = await supabase
+      const fetchPromise = supabase
         .from('sarang_reviews')
         .select('*')
         .order('created_at', { ascending: false });
+      const timeoutPromise = new Promise<{ data: any; error: any }>((_, reject) =>
+        setTimeout(() => reject(new Error('Supabase reviews fetch timeout')), 2500)
+      );
+
+      const { data, error } = (await Promise.race([fetchPromise, timeoutPromise])) as any;
 
       if (!error && data && data.length > 0) {
         return data.map((d: any) => ({

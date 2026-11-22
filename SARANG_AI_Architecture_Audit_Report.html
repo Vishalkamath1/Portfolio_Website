@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SARANG AI — Comprehensive Architecture & Codebase Audit</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --border: #1e293b;
+      --accent-cyan: #06b6d4;
+      --accent-gold: #f59e0b;
+      --accent-green: #10b981;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --code-bg: #020617;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 0;
+      margin: 0;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .toolbar-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #06b6d4, #2563eb);
+      color: #020617;
+      border-color: #06b6d4;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: var(--text-main);
+      border-color: #334155;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 24px 80px;
+    }
+
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent-cyan);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .meta-grid strong {
+      color: var(--text-main);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 36px 0 16px;
+      color: #ffffff;
+      border-left: 4px solid var(--accent-cyan);
+      padding-left: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 24px 0 10px;
+      color: #e2e8f0;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: #cbd5e1;
+      font-size: 14.5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 13.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.7);
+      color: #f8fafc;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .status-p0 {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .status-p1 {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+    .status-p2 {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    pre, code {
+      font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+      font-size: 12.5px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin: 12px 0 16px;
+      color: #e2e8f0;
+    }
+
+    code {
+      background: rgba(30, 41, 59, 0.8);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #38bdf8;
+    }
+
+    ul {
+      margin: 10px 0 16px 24px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+
+    .footer {
+      margin-top: 60px;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Print Optimizations */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+      }
+      .toolbar {
+        display: none !important;
+      }
+      .container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      h1, h2, h3 {
+        color: #0f172a !important;
+      }
+      h2 {
+        border-left: 4px solid #0284c7 !important;
+      }
+      p, li, td, th {
+        color: #334155 !important;
+      }
+      .card, table {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid;
+      }
+      th {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+      }
+      pre {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+      code {
+        background: #f1f5f9 !important;
+        color: #0369a1 !important;
+      }
+      .badge {
+        background: #e0f2fe !important;
+        border: 1px solid #0284c7 !important;
+        color: #0369a1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Action Bar -->
+  <div class="toolbar">
+    <div class="toolbar-title">
+      <span>🛡️</span>
+      <span>SARANG AI Architecture Audit Report</span>
+    </div>
+    <div class="toolbar-actions">
+      <a href="/SARANG_AI_Architecture_Audit_Report.md" download="SARANG_AI_Architecture_Audit_Report.md" class="btn btn-secondary">
+        ⬇️ Download Markdown (.md)
+      </a>
+      <button onclick="window.print()" class="btn btn-primary">
+        🖨️ Print / Save as PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <!-- Report Header -->
+    <div class="header">
+      <div class="badge">Architecture & Codebase Audit</div>
+      <h1>SARANG AI — Comprehensive Architecture & Codebase Audit</h1>
+      <div class="meta-grid">
+        <div><strong>Date:</strong> November 15, 2026</div>
+        <div><strong>Auditor:</strong> Principal Software Architect</div>
+        <div><strong>Repository:</strong> sarang-ai-portfolio@1.0.0</div>
+        <div><strong>Stack:</strong> Next.js 14.2, TypeScript 5.6, Tailwind CSS, Supabase</div>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <h2>1. Executive Summary & Health Scorecard</h2>
+    <p>
+      A full architectural review was performed across the component hierarchy, state contexts, API endpoints, Supabase data access layer, and UI responsiveness layers.
+    </p>
+    <p>
+      The application demonstrates strong visual polish, solid TypeScript coverage (zero type errors on build), and resilient offline fallbacks (<code>localStorage</code> + mock domain data). However, several iterations of feature evolution (specifically migrating from a modal-based chat experience to an inline tripartite console in Section 5) have left behind dead components, orphaned state, redundant data fetching, and divergent API routes.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Score</th>
+          <th>Status</th>
+          <th>Key Focus Area</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Component Structure & Modularity</strong></td>
+          <td><strong>78 / 100</strong></td>
+          <td><span class="status-pill status-p1">🟡 Moderate Debt</span></td>
+          <td>471 lines of dead modal code; unused state & redundant DB calls in Section 5</td>
+        </tr>
+        <tr>
+          <td><strong>Supabase & API Efficiency</strong></td>
+          <td><strong>72 / 100</strong></td>
+          <td><span class="status-pill status-p1">🟡 Divergent</span></td>
+          <td><code>/api/chat</code> is abandoned while <code>/api/jnana</code> uses a generic system prompt; client-side admin auth</td>
+        </tr>
+        <tr>
+          <td><strong>Performance & Responsiveness</strong></td>
+          <td><strong>88 / 100</strong></td>
+          <td><span class="status-pill status-p2">🟢 Solid</span></td>
+          <td>Fast static builds (22.5 kB page bundle); hardcoded viewport scroll heuristics need minor tuning</td>
+        </tr>
+        <tr>
+          <td><strong>Type Safety & Build Integrity</strong></td>
+          <td><strong>95 / 100</strong></td>
+          <td><span class="status-pill status-p2">🟢 Excellent</span></td>
+          <td>Strict TypeScript compilation (<code>tsc --noEmit</code>), clean production build (<code>next build</code>)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 2 -->
+    <h2>2. Component Structure & Modularity</h2>
+    
+    <div class="card">
+      <h3>2.1 Critical Dead Code: SarangChatModal.tsx (471 Lines)</h3>
+      <p><strong>File:</strong> <code>src/components/SarangChatModal.tsx</code> &bull; <strong>Status:</strong> Completely Orphaned</p>
+      <p>
+        Following the Section 5 upgrade to an integrated inline console, the popup modal was retired. However, the file remains in the repository. It is never imported, referenced, or rendered by any page or layout.
+      </p>
+      <p><strong>Impact:</strong> Increases repository clutter and cognitive overhead for future maintainers.</p>
+    </div>
+
+    <div class="card">
+      <h3>2.2 Zombie State & Vestigial Modal Methods in AgentChatContext.tsx</h3>
+      <p><strong>File:</strong> <code>src/context/AgentChatContext.tsx</code></p>
+      <p>The context continues to expose state variables designed solely for the retired popup modal:</p>
+      <ul>
+        <li><code>isChatOpen</code> / <code>setIsChatOpen</code></li>
+        <li><code>closeChat</code></li>
+        <li>Redundant alias exports: <code>handleAgentSelection: openSpecialistChat</code>, <code>openSarangChat: openSpecialistChat</code></li>
+        <li><code>src/components/Navbar.tsx</code> destructures <code>isChatOpen</code> without using it.</li>
+      </ul>
+      <p><strong>Impact:</strong> React re-render overhead when unused state variables update; cluttered context API.</p>
+    </div>
+
+    <div class="card">
+      <h3>2.3 Duplicate State & Redundant Supabase DB Fetch in AgentSection.tsx</h3>
+      <p><strong>File:</strong> <code>src/components/sections/AgentSection.tsx</code></p>
+      <ul>
+        <li>Both <code>ProjectsSection.tsx</code> and <code>AgentSection.tsx</code> invoke <code>fetchProjectsFromDb()</code> independently on initial mount.</li>
+        <li>In <code>AgentSection.tsx</code>, the fetched <code>projects</code> array is only used to compute <code>jnanaProjects</code>.</li>
+        <li><code>jnanaProjects</code> is <strong>never rendered or referenced anywhere</strong> in <code>AgentSection.tsx</code>.</li>
+        <li><code>selectedProject</code> is declared (<code>useState&lt;Project | null&gt;(null)</code>), passed to <code>&lt;ProjectModal /&gt;</code>, but <strong>never set</strong> to any project inside Section 5.</li>
+      </ul>
+      <p><strong>Impact:</strong> Redundant network roundtrips to Supabase on home page load, unneeded React reconciliation cycles, and dead component mounting.</p>
+    </div>
+
+    <!-- Section 3 -->
+    <h2>3. Supabase & API Efficiency</h2>
+
+    <div class="card">
+      <h3>3.1 Route Divergence: Unused /api/chat vs Active /api/jnana</h3>
+      <p><strong>Files:</strong> <code>src/app/api/chat/route.ts</code> (152 lines) & <code>src/app/api/jnana/route.ts</code> (93 lines)</p>
+      <p>
+        <code>AgentSection.tsx</code> submits messages directly to <code>/api/jnana</code> (<code>fetch('/api/jnana')</code>).
+        <code>/api/chat</code> is <strong>never called by any component</strong> in the codebase.
+      </p>
+      <p>
+        <strong>The Problem:</strong> <code>/api/chat</code> contains the comprehensive, 60-line underwriting persona prompt (<code>OWNER BACKGROUND</code>, <code>PORTFOLIO PROJECTS CONTEXT</code>, <code>SPECIALIST MODE</code> prompts, <code>REGULATORY GUARDRAIL</code>, and high-fidelity fallback). Conversely, <code>/api/jnana</code> streams tokens using a generic system instruction:
+      </p>
+      <pre><code>systemInstruction: 'You are a helpful AI assistant.'</code></pre>
+      <p><strong>Impact:</strong> Live Gemini responses streamed through Section 5 lack the specialized underwriting persona, ICR rules, and compliance disclaimers present in <code>/api/chat</code>.</p>
+      <p><strong>Architectural Fix:</strong> Merge the rich domain prompt from <code>/api/chat</code> into <code>/api/jnana</code>'s streaming pipeline, and safely retire <code>/api/chat</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>3.2 Direct Client Supabase Calls vs API Route Inconsistency</h3>
+      <p><strong>File:</strong> <code>src/lib/supabaseClient.ts</code></p>
+      <ul>
+        <li><strong>Contact Form:</strong> Submits to a Next.js server route (<code>/api/contact</code>), performing server-side validation before writing to Supabase.</li>
+        <li><strong>Reviews Form:</strong> Directly calls <code>saveSarangReview()</code> client-side, running <code>supabase.from('sarang_reviews').insert(...)</code> using the public <code>anon</code> key from the browser.</li>
+        <li><strong>Projects CMS:</strong> Directly calls <code>saveProjectToDb()</code> and <code>deleteProjectFromDb()</code> client-side from <code>/admin</code>.</li>
+      </ul>
+      <p><strong>Impact:</strong> Inconsistent architecture. If Supabase Row Level Security (RLS) is enabled without explicit public <code>INSERT</code> policies on <code>sarang_reviews</code>, reviews will fail silently and only save to local storage.</p>
+    </div>
+
+    <div class="card">
+      <h3>3.3 Admin Authentication Security Boundary</h3>
+      <p><strong>Files:</strong> <code>src/app/admin/page.tsx</code> & <code>src/app/admin/login/page.tsx</code></p>
+      <p>
+        Authentication for <code>/admin</code> is verified strictly via client-side <code>sessionStorage.getItem('sarang_admin_auth')</code>.
+      </p>
+      <p><strong>Risk:</strong> There is no server-side Next.js middleware check (<code>middleware.ts</code>). If a visitor sets <code>sessionStorage.setItem('sarang_admin_auth', 'true')</code> in DevTools, they can view the admin interface.</p>
+      <p><strong>Recommendation:</strong> Implement Next.js <code>middleware.ts</code> with encrypted HTTP-only session cookies or Supabase Auth SSR (<code>@supabase/ssr</code>).</p>
+    </div>
+
+    <!-- Section 4 -->
+    <h2>4. Performance & UI Responsiveness</h2>
+
+    <div class="card">
+      <h3>4.1 Viewport-Aware Scroll Heuristics</h3>
+      <p><strong>File:</strong> <code>src/context/AgentChatContext.tsx</code></p>
+      <pre><code>const isAlreadyVisible = rect.top >= 50 && rect.top <= 280;
+if (!isAlreadyVisible) {
+  targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}</code></pre>
+      <p>
+        The <code>rect.top >= 50 && rect.top <= 280</code> heuristic effectively prevents screen jumps when the user interacts with specialist buttons inside Section 5 on standard 1080p/1440p displays. On compact laptops (e.g. 1366x768) or mobile landscape orientations, <code>rect.top</code> may sit slightly outside this range while the chat is still partially in view.
+      </p>
+      <p><strong>Refinement:</strong> Use dynamic viewport ratio calculation (<code>rect.top < window.innerHeight * 0.4 && rect.bottom > window.innerHeight * 0.3</code>).</p>
+    </div>
+
+    <div class="card">
+      <h3>4.2 Layout Density, Truncation & GPU Compositing</h3>
+      <ul>
+        <li><strong>Specialist Cards:</strong> Uses <code>grid grid-cols-2 gap-2</code> with <code>line-clamp-1</code>. On screens under 360px wide, long titles get truncated aggressively. Recommended: <code>sm:grid-cols-2 grid-cols-1</code>.</li>
+        <li><strong>Double Transform Declarations:</strong> Both inline <code>style={{ transform: 'translateZ(0)', isolation: 'isolate' }}</code> and Tailwind classes <code>transform-gpu isolate</code> are declared simultaneously in <code>Navbar.tsx</code> and <code>HeroSection.tsx</code>.</li>
+        <li><strong>GPU Composite Thread Load:</strong> Deep SVG filter blurs (<code>blur-[160px]</code>) across 7 sections can cause frame drops on older mobile GPUs.</li>
+      </ul>
+    </div>
+
+    <!-- Section 5 -->
+    <h2>5. Prioritized Action Plan</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Area</th>
+          <th>Action</th>
+          <th>Effort</th>
+          <th>Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="status-pill status-p0">P0</span></td>
+          <td><strong>API Sync</strong></td>
+          <td>Transfer rich domain persona & fallback logic from <code>/api/chat</code> to <code>/api/jnana</code>, then remove <code>/api/chat</code>.</td>
+          <td>Low</td>
+          <td>High — Sarang AI streaming responses become domain-accurate.</td>
+        </tr>
+        <tr>
+          <td><span class="status-pill status-p0">P0</span></td>
+          <td><strong>Dead Code</strong></td>
+          <td>Delete <code>src/components/SarangChatModal.tsx</code>.</td>
+          <td>Low</td>
+          <td>Medium — Removes 471 lines of tech debt.</td>
+        </tr>
+        <tr>
+          <td><span class="status-pill status-p0">P0</span></td>
+          <td><strong>Performance</strong></td>
+          <td>Remove <code>fetchProjectsFromDb()</code>, <code>jnanaProjects</code>, and <code>&lt;ProjectModal&gt;</code> from <code>AgentSection.tsx</code>.</td>
+          <td>Low</td>
+          <td>Medium — Eliminates redundant database query on initial mount.</td>
+        </tr>
+        <tr>
+          <td><span class="status-pill status-p1">P1</span></td>
+          <td><strong>Context Cleanup</strong></td>
+          <td>Remove <code>isChatOpen</code>, <code>setIsChatOpen</code>, <code>closeChat</code> from <code>AgentChatContext.tsx</code>.</td>
+          <td>Low</td>
+          <td>Low — Cleaner context API.</td>
+        </tr>
+        <tr>
+          <td><span class="status-pill status-p1">P1</span></td>
+          <td><strong>Security</strong></td>
+          <td>Add Next.js <code>middleware.ts</code> to protect <code>/admin</code> route with server session validation.</td>
+          <td>Medium</td>
+          <td>High — Secures admin dashboard against client inspection.</td>
+        </tr>
+        <tr>
+          <td><span class="status-pill status-p2">P2</span></td>
+          <td><strong>Mobile UI</strong></td>
+          <td>Change Section 5 specialist buttons grid to <code>grid-cols-1 xs:grid-cols-2</code> and tune mobile blurs.</td>
+          <td>Low</td>
+          <td>Low — Better small-screen polish and smoother mobile 60fps scrolling.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      SARANG AI &bull; Confidential Architecture & Security Audit &bull; Generated for Vishal Kamath
+    </div>
+
+  </div>
+
+</body>
+</html>

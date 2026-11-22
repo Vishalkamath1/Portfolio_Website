@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Shield, Bot, Sparkles, Lock, LogOut } from 'lucide-react';
+import { Menu, X, Shield, Bot, Sparkles, Lock, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -83,9 +83,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      style={{ transform: 'translateZ(0)', isolation: 'isolate' }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 transform-gpu isolate ${
         scrolled
-          ? 'glass-panel border-b border-cyan-500/20 py-3 shadow-lg shadow-black/50'
+          ? 'bg-[#020617]/90 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.6)] py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -93,13 +94,17 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Brand Logo */}
           <Link href="#hero" className="flex items-center gap-3 group">
-            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-cyan-400/50 shadow-cyan-glow group-hover:border-gold-400 transition-colors">
+            <div 
+              style={{ transform: 'translateZ(0)', isolation: 'isolate' }}
+              className="relative w-11 h-11 rounded-xl overflow-hidden ring-1 ring-inset ring-cyan-500/40 bg-cyan-950 shadow-[0_0_15px_rgba(6,182,212,0.25)] group-hover:ring-gold-400 transition-colors shrink-0 transform-gpu isolate"
+            >
               <Image
-                src="/images/sarang-avatar.jpg"
-                alt="SARANG AI"
+                src="/Sarang%20New%20Logo.png"
+                alt="Sarang AI Agent Logo"
                 fill
-                className="object-cover"
-                sizes="36px"
+                className="object-contain p-1"
+                sizes="44px"
+                priority
               />
             </div>
             <div className="flex flex-col">
@@ -114,20 +119,31 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`px-3.5 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
-                  link.highlight
-                    ? 'text-cyan-300 bg-cyan-950/50 border border-cyan-500/40 hover:bg-cyan-900/60 hover:shadow-cyan-glow flex items-center gap-1.5'
-                    : 'text-slate-300 hover:text-cyan-400 hover:bg-slate-800/40'
-                }`}
-              >
-                {link.highlight && <Bot className="w-4 h-4 text-cyan-400 animate-pulse" />}
-                {link.name}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              if (link.highlight) {
+                return (
+                  <div key={link.name} className="relative group px-1">
+                    <Link
+                      href={link.href}
+                      className="relative group transition-all duration-300 px-4 py-1.5 text-xs font-semibold rounded-full text-cyan-300 bg-cyan-950/70 border border-cyan-400/80 hover:bg-cyan-900/60 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                    >
+                      <Bot className="w-4 h-4 text-cyan-400" />
+                      <span>{link.name}</span>
+                    </Link>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="px-3.5 py-1.5 text-sm font-medium rounded-md nav-link-transition text-slate-300 hover:text-cyan-400 hover:bg-slate-800/40"
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
 
             <div className="h-4 w-px bg-slate-700/60 mx-2" />
 
@@ -155,10 +171,10 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/admin"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-gold-400 hover:border-gold-500/40 border border-transparent rounded-md transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-cyan-400 transition-colors"
                 title="Owner Admin Dashboard"
               >
-                <Lock className="w-3.5 h-3.5" />
+                <User className="w-3.5 h-3.5" />
                 <span>Admin</span>
               </Link>
             )}
@@ -168,15 +184,18 @@ export default function Navbar() {
           <div className="lg:hidden flex items-center gap-2">
             <Link
               href="/admin"
-              className="p-2 text-slate-400 hover:text-gold-400 rounded-md"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] p-2 text-slate-400 hover:text-gold-400 rounded-md flex items-center justify-center shrink-0 transition-colors"
               title="Admin"
+              aria-label="Admin Portal"
             >
               <Lock className="w-4 h-4" />
             </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-slate-300 hover:text-cyan-400 rounded-md focus:outline-none"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] p-2 text-slate-300 hover:text-cyan-400 rounded-md focus:outline-none flex items-center justify-center shrink-0 transition-colors"
               aria-label="Toggle menu"
+              aria-expanded={isOpen}
+              aria-controls="mobile-navigation"
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -186,15 +205,15 @@ export default function Navbar() {
 
       {/* Mobile menu dropdown */}
       {isOpen && (
-        <div className="lg:hidden glass-panel border-b border-cyan-500/20 px-4 pt-2 pb-6 space-y-1 shadow-2xl">
+        <div id="mobile-navigation" className="lg:hidden bg-[#020617]/95 backdrop-blur-md px-4 pt-2 pb-6 space-y-1 shadow-2xl">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className={`block px-4 py-2.5 rounded-md text-base font-medium transition-colors ${
+              className={`flex items-center px-4 py-3 min-h-[44px] rounded-md text-base font-medium transition-colors ${
                 link.highlight
-                  ? 'text-cyan-300 bg-cyan-950/70 border border-cyan-500/30'
+                  ? 'text-cyan-300 bg-cyan-950/70 ring-1 ring-cyan-500/30'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
               }`}
             >
@@ -207,7 +226,7 @@ export default function Navbar() {
                 <Link
                   href="/admin"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-sm text-gold-400 hover:text-gold-300"
+                  className="flex items-center gap-2 min-h-[44px] text-sm text-gold-400 hover:text-gold-300"
                 >
                   <Lock className="w-4 h-4" />
                   Admin Dashboard
@@ -218,7 +237,7 @@ export default function Navbar() {
                     setIsOpen(false);
                     handleLogout();
                   }}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/50 border border-rose-500/30 rounded-md"
+                  className="flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/50 border border-rose-500/30 rounded-md"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Log Out</span>
@@ -228,7 +247,7 @@ export default function Navbar() {
               <Link
                 href="/admin"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gold-400 hover:text-gold-300"
+                className="flex items-center gap-2 px-4 py-3 min-h-[44px] text-sm text-gold-400 hover:text-gold-300"
               >
                 <Lock className="w-4 h-4" />
                 Owner Admin Portal

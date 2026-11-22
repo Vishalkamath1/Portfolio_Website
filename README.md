@@ -12,7 +12,7 @@ A high-performance, full-stack portfolio website showcasing **7.4 years of insur
 
 SARANG AI is architected with a strict 7-section single-page experience, a single integrated central AI assistant, and a private owner administration dashboard:
 
-1. **Hero Section** — Futuristic Archer Guardian branding, impactful headline, dual CTA buttons.
+1. **Hero Section** — Futuristic Archer Guardian branding, impactful headline, dual CTA buttons, and a cinematic floating character presentation with concentric holographic ripple energy platforms, breathing auras, and interactive copilot engagement.
 2. **About Me** — 7.4-year professional insurance journey, GMC & GPA underwriting focus, and transition into AI solutions.
 3. **Expertise** — 7 authentic domain capability cards (GMC, GPA, Operations, Advanced Excel, AI Prompt Engineering, Process Automation, AI in Insurance).
 4. **AI Projects Library** — Dynamic, filterable, searchable showcase with category selectors and project deep-dive modals.

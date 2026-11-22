@@ -64,7 +64,7 @@ export default function ExpertiseSection() {
                   : 'glass-panel text-slate-300 hover:text-white border-slate-700'
               }`}
             >
-              All 7 Competencies
+              All 6 Competencies
             </button>
             <button
               onClick={() => setFilter('core_insurance')}
@@ -89,7 +89,7 @@ export default function ExpertiseSection() {
           </div>
         </div>
 
-        {/* 7 Professional Cards Grid */}
+        {/* 6 Professional Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredItems.map((item) => (
             <div

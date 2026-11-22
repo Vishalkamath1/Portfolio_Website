@@ -12,9 +12,9 @@ export const OWNER_PROFILE = {
   agentTagline: "Bridging Insurance Expertise with Artificial Intelligence.",
   companionTitle: "Sarang - Your Intelligent Companion",
   companionMotto: "LEARN • EXECUTE • MONITOR",
-  heroImage: "/New sarang-archer.png",
-  avatar: "/New sarang-archer.png",
-  image: "/New sarang-archer.png",
+  heroImage: "/sarang-warrior-fixed.png",
+  avatar: "/sarang-avatar.png",
+  image: "/sarang-avatar.png",
   yearsExperience: "7.4 Years",
   email: "Kamathvishal109@gmail.com",
   linkedin: "https://www.linkedin.com/in/vishal-kamath-073618a5",
@@ -30,6 +30,16 @@ Today, I am bringing together my domain knowledge, analytical skills, and artifi
 
 export const CAREER_JOURNEY: CareerMilestone[] = [
   {
+    period: "Frontline Sales",
+    role: "Frontline Life Insurance Sales & Advisory",
+    focus: "Direct client engagement, behavioural risk & customer protection",
+    highlights: [
+      "Began career in frontline life insurance sales, directly engaging with clients.",
+      "Managed behavioural risk and gained vital ground-level perspective on customer decision-making.",
+      "Established foundational risk profiling principles that transitioned into corporate underwriting operations."
+    ]
+  },
+  {
     period: "Corporate Underwriting",
     role: "Underwriter — GMC & GPA (Tata AIG & Zurich Kotak)",
     focus: "Enterprise risk, premium evaluation, claims experience analysis & target loss ratios",
@@ -38,16 +48,6 @@ export const CAREER_JOURNEY: CareerMilestone[] = [
       "Assessed enterprise risk, premium evaluation, and claims experience analysis to hit target loss ratios.",
       "Navigated complex corporate policy wordings, exclusions, and co-pay structures.",
       "Led extensive work in system UAT and product redesign, identifying key operational gaps."
-    ]
-  },
-  {
-    period: "Frontline Sales",
-    role: "Frontline Life Insurance Sales & Advisory",
-    focus: "Direct client engagement, behavioural risk & customer protection",
-    highlights: [
-      "Began career in frontline life insurance sales, directly engaging with clients.",
-      "Managed behavioural risk and gained vital ground-level perspective on customer decision-making.",
-      "Established foundational risk profiling principles that transitioned into corporate underwriting operations."
     ]
   },
   {
@@ -65,129 +65,101 @@ export const CAREER_JOURNEY: CareerMilestone[] = [
 
 export const EXPERTISE_ITEMS: ExpertiseItem[] = [
   {
-    id: 'gmc-underwriting',
-    title: 'GMC Underwriting',
+    id: 'gmc-underwriting-strategy',
+    title: 'GMC Underwriting Strategy',
     category: 'core_insurance',
-    badge: 'Core Underwriting',
+    badge: 'CORE UNDERWRITING',
     iconName: 'ShieldCheck',
-    summary: 'Comprehensive risk evaluation and pricing for Group Medical Care schemes.',
+    summary: 'Comprehensive risk evaluation and strategic pricing for Group Medical Care portfolios.',
     bullets: [
-      'Demographic & morbidity profile risk weighting',
-      'Loss ratio & ICR (Incurred Claims Ratio) analysis',
-      'Corporate benefit structuring & maternity/maternity waiver costing',
-      'Co-payment, capping, and network hospital optimization'
+      'Demographic, morbidity, and past-claims (ICR) risk weighting.',
+      'Corporate benefit structuring (maternity waivers, sub-limits, co-pays).',
+      'Cost-containment strategy via room rent capping and network optimization.',
+      'Technical defense and negotiation of renewal premium loadings.'
     ]
   },
   {
-    id: 'gpa-underwriting',
-    title: 'GPA Underwriting',
+    id: 'gpa-underwriting-risk-grading',
+    title: 'GPA Underwriting & Risk Grading',
     category: 'core_insurance',
-    badge: 'Accident Risk',
+    badge: 'ACCIDENT RISK',
     iconName: 'UserCheck',
-    summary: 'Risk grading and coverage formulation for Group Personal Accident portfolios.',
+    summary: 'Precision occupational hazard grading and coverage formulation for Group Personal Accident schemes.',
     bullets: [
-      'Occupational hazard classification (Class I, II, III)',
-      'Death, PTD, PPD, and TTD coverage structuring',
-      'High-risk industry endorsements & accumulation limits',
-      'Table of Benefits design and premium quote calibration'
+      'Advanced occupational hazard classification (Risk Category I, II, III).',
+      'Coverage structuring for Death, PTD, PPD, and TTD benefits.',
+      'Risk accumulation analysis and high-risk industry endorsements.',
+      'Actuarial burn-cost table design and premium quote calibration.'
     ]
   },
   {
-    id: 'insurance-operations',
-    title: 'Insurance Operations',
-    category: 'core_insurance',
-    badge: 'Operations',
-    iconName: 'Workflow',
-    summary: 'End-to-end lifecycle management of corporate policy administration and servicing.',
-    bullets: [
-      'TPA coordination, network cashless facilitation, and claim escalation',
-      'Endorsement processing (CD balance tracking, additions & deletions)',
-      'SLA monitoring and operational compliance',
-      'Broker and client servicing negotiations'
-    ]
-  },
-  {
-    id: 'advanced-excel',
+    id: 'advanced-data-quantitative-modelling',
     title: 'Advanced Excel & Data Modelling',
     category: 'core_insurance',
-    badge: 'Analytical Engine',
+    badge: 'ANALYTICAL ENGINE',
     iconName: 'FileSpreadsheet',
-    summary: 'High-speed quantitative modeling for burn costs, claim trends, and premium tables.',
+    summary: 'High-speed quantitative analysis for burn costs, claim frequency, and premium calibration.',
     bullets: [
-      'Complex multi-sheet nested formulas, dynamic arrays, and lookups',
-      'Pivot table reporting for claims frequency and severity distributions',
-      'Burn cost calculator creation and quotation templates',
-      'Data sanitation for messy employee group census files'
+      'Complex multi-sheet nested formulas, dynamic arrays, and lookups.',
+      'Pivot table reporting for claims frequency and severity distributions.',
+      'Custom burn-cost calculator creation and quotation templates.',
+      'Data sanitation pipelines for messy employee group census files.'
     ]
   },
   {
-    id: 'ai-prompt-engineering',
-    title: 'AI Tools & Prompt Engineering',
+    id: 'ai-prompt-architecture-engineering',
+    title: 'AI Prompt Architecture & Engineering',
     category: 'technical_ai',
-    badge: 'AI Practitioner',
+    badge: 'AI PRACTITIONER',
     iconName: 'Cpu',
-    summary: 'Tailoring LLM context prompts to extract insights from verbose policy documents.',
+    summary: 'Tailoring LLM context windows to extract high-value insights from verbose policy documents.',
     bullets: [
-      'Structured few-shot prompt design for insurance policy comparisons',
-      'Context conditioning for medical exclusion detection',
-      'Automated email and underwriting inquiry drafting',
-      'System prompt architecture for domain-specific assistants'
+      'Structured few-shot prompt design for insurance policy comparisons.',
+      'Context conditioning for complex medical exclusion detection.',
+      'System prompt architecture for domain-specific underwriting assistants.',
+      'Strict guardrail engineering to prevent AI hallucination in coverage answers.'
     ]
   },
   {
-    id: 'process-automation',
+    id: 'insurance-process-automation',
     title: 'Insurance Process Automation',
     category: 'technical_ai',
-    badge: 'Automation',
+    badge: 'AUTOMATION',
     iconName: 'Zap',
-    summary: 'Streamlining repetitive clerical underwriting tasks into automated workflows.',
+    summary: 'Streamlining repetitive underwriting and clerical data tasks into automated workflows.',
     bullets: [
-      'Employee census data cleaning & format conversion',
-      'Automated check-sheet generation for broker RFQs',
-      'Error reduction in policy schedule generation',
-      'Workflow integration between Excel inputs and AI agents'
+      'Employee census data cleaning and format conversion.',
+      'Automated check-sheet generation for broker RFQs.',
+      'Workflow integration between quantitative Excel inputs and AI agents.',
+      'Error reduction protocols in policy schedule generation.'
     ]
   },
   {
-    id: 'ai-in-insurance',
-    title: 'AI in Insurance (Vision & Strategy)',
+    id: 'ai-solution-architecture',
+    title: 'AI Solution Architecture (Vision & Strategy)',
     category: 'technical_ai',
-    badge: 'Domain Innovation',
+    badge: 'DOMAIN INNOVATION',
     iconName: 'Lightbulb',
-    summary: 'Bridging insurance underwriting realities with practical, trustworthy AI systems.',
+    summary: 'Bridging traditional underwriting realities with practical, trustworthy AI automation blueprints.',
     bullets: [
-      'Pragmatic AI roadmaps tailored for traditional insurance teams',
-      'Ethical AI guardrails preventing unauthorized binding commitments',
-      'Underwriter-in-the-loop validation frameworks',
-      'Continuous experimentation with modern LLMs and agentic tools'
+      'Pragmatic AI roadmaps tailored for traditional insurance teams.',
+      'Ethical AI guardrails preventing unauthorized binding commitments.',
+      'Underwriter-in-the-loop (UITL) validation frameworks.',
+      'Converting operational bottlenecks into structured AI workflow solutions.'
     ]
   }
 ];
 
 export const INITIAL_PROJECTS: Project[] = [
   {
-    id: 'proj-1',
-    title: 'GMC Policy Clause & Exclusion AI Comparer',
-    tagline: 'Instant semantic cross-comparison between conflicting broker wordings and carrier terms.',
+    id: 'gpa-claims-helpdesk',
+    title: 'GPA Claims Admissibility & Grievance Helpdesk',
+    tagline: 'Evaluates medical data against standard disability grids and generates grievance roadmaps.',
     category: 'GMC & GPA Underwriting AI',
-    businessProblem: 'Brokers submit custom policy wordings containing subtle alterations in standard clauses (e.g., modern treatment caps, room rent limits). Manually comparing 50-page PDF wordings line-by-line takes hours and invites costly claim leakages.',
-    proposedSolution: 'An AI-powered comparison pipeline that parses standard carrier wordings versus broker-requested variants, highlighting deviations, sub-limit changes, and ambiguity in coverage clauses.',
-    tools: ['Google Gemini API', 'Next.js', 'Advanced Excel Wordings Model', 'TypeScript'],
-    businessImpact: 'Reduces policy wording audit time from 3 hours to under 3 minutes with automated risk flags for underwriters.',
-    status: 'Completed',
-    demoUrl: '#agent',
-    githubUrl: 'https://github.com/example/gmc-wordings-ai',
-    published: true,
-    featured: true,
-    createdAt: '2026-10-15'
-  },
-  {
-    id: 'proj-2',
-    title: 'GPA Occupational Risk Classifier & Rate Engine',
-    tagline: 'Standardizing hazardous industry job titles into accurate underwriting risk classes.',
-    category: 'GMC & GPA Underwriting AI',
-    businessProblem: 'Group Personal Accident proposals often have inconsistent job designations (e.g., "Site Executive" vs "Field Engineer"), resulting in misclassified hazard classes and inaccurate premium rating.',
-    proposedSolution: 'An intelligent classifier trained on occupational risk benchmarks that matches raw designations to IRDAI/standard Class I, II, or III risk bands with suggested loading percentages.',
+    pillarMode: 'Jnana Mode',
+    agentId: 'gpa-claims-helpdesk',
+    businessProblem: 'Group Personal Accident proposals often have inconsistent job designations and complex claim rejections, resulting in misclassified hazard classes and claim disputes.',
+    proposedSolution: 'An intelligent evaluation and triage helpdesk trained on occupational risk benchmarks and standard disability grids with suggested loading percentages and grievance roadmaps.',
     tools: ['Prompt Engineering', 'Excel Automation', 'TypeScript', 'Tailwind CSS'],
     businessImpact: 'Prevents under-pricing of high-risk occupations while eliminating manual back-and-forth broker queries.',
     status: 'Completed',
@@ -198,27 +170,49 @@ export const INITIAL_PROJECTS: Project[] = [
     createdAt: '2026-10-20'
   },
   {
-    id: 'proj-3',
-    title: 'Corporate Burn-Cost & Loss Ratio Visualizer',
-    tagline: 'Predictive claims trajectory and renewal loading calculator for GMC corporate accounts.',
+    id: 'irdai-health-decoder',
+    title: 'IRDAI Health Circular Decoder',
+    tagline: 'Translates complex regulatory mandates into plain English and parses conflicting broker wordings.',
+    category: 'GMC & GPA Underwriting AI',
+    pillarMode: 'Jnana Mode',
+    agentId: 'irdai-health-decoder',
+    businessProblem: 'IRDAI circulars and broker-submitted policy wordings contain subtle alterations in standard clauses (e.g., modern treatment caps, room rent limits). Manually comparing 50-page PDF wordings line-by-line takes hours and invites costly claim leakages.',
+    proposedSolution: 'An AI-powered comparison and circular decoding pipeline that translates regulatory mandates and highlights coverage deviations.',
+    tools: ['Google Gemini API', 'Next.js', 'Advanced Excel Wordings Model', 'TypeScript'],
+    businessImpact: 'Reduces policy wording audit time from 3 hours to under 3 minutes with automated risk flags for underwriters.',
+    status: 'Completed',
+    demoUrl: '#agent',
+    githubUrl: 'https://github.com/example/gmc-wordings-ai',
+    published: true,
+    featured: true,
+    createdAt: '2026-10-15'
+  },
+  {
+    id: 'insurance-ai-architect',
+    title: 'Insurance AI Solution Architect',
+    tagline: 'Drafts structured automation blueprints, predictive claims trajectory, and renewal loading models.',
     category: 'Insurance Analytics / Power BI',
-    businessProblem: 'During renewal season, underwriters struggle to rapidly correlate past 3-year claims dumps against demographic changes to calculate equitable burn costs.',
-    proposedSolution: 'A responsive analytical module that processes historical claims feeds, projects IBNR (Incurred But Not Reported) factors, and models what-if scenarios for corporate co-pays and room rent caps.',
+    pillarMode: 'Jnana Mode',
+    agentId: 'insurance-ai-architect',
+    businessProblem: 'Underwriters struggle to rapidly correlate past 3-year claims dumps against demographic changes to calculate equitable burn costs and automate repetitive workflows.',
+    proposedSolution: 'A responsive analytical and architectural module that processes historical claims feeds, projects IBNR factors, and models what-if renewal scenarios.',
     tools: ['Advanced Excel Models', 'Next.js Charts', 'Data Normalization'],
     businessImpact: 'Enables real-time negotiation support during broker meetings with instant impact modeling on portfolio loss ratios.',
-    status: 'In Progress',
+    status: 'Completed',
     demoUrl: '#projects',
     published: true,
     featured: true,
     createdAt: '2026-10-28'
   },
   {
-    id: 'proj-4',
-    title: 'SARANG Underwriting Knowledge Agent',
-    tagline: 'Centralized conversational copilot for group health insurance rules, guidelines, and terms.',
+    id: 'gmc-gpa-knowledge-hub',
+    title: 'GMC & GPA Knowledge Hub',
+    tagline: 'Senior underwriter advisory for policy wordings, market standards, and occupational exclusions.',
     category: 'GenAI Tools',
+    pillarMode: 'Jnana Mode',
+    agentId: 'gmc-gpa-knowledge-hub',
     businessProblem: 'Junior underwriting executives and sales teams spend valuable time asking senior underwriters routine questions about standard limits, waiting periods, and deductible rules.',
-    proposedSolution: 'A dedicated AI agent (SARANG) steeped in insurance underwriting guidelines capable of answering queries, clarifying GPA tables of benefits, and citing standard practice.',
+    proposedSolution: 'A dedicated AI agent steeped in insurance underwriting guidelines capable of answering queries, clarifying GPA tables of benefits, and citing standard practice.',
     tools: ['Gemini 1.5/2.0 API', 'System Conditioning', 'React', 'Tailwind CSS'],
     businessImpact: 'Accelerates onboarding of new underwriters and frees senior capacity for complex corporate risk pricing.',
     status: 'Completed',
@@ -226,34 +220,6 @@ export const INITIAL_PROJECTS: Project[] = [
     published: true,
     featured: true,
     createdAt: '2026-11-01'
-  },
-  {
-    id: 'proj-5',
-    title: 'Census Cleanse: Automated Employee Data Sanitizer',
-    tagline: 'Python & Excel macro automation to clean messy corporate employee enrollment spreadsheets.',
-    category: 'Automation (Excel/Python)',
-    businessProblem: 'Corporate HRs submit member enrollment spreadsheets with invalid date formats, missing relation tags, duplicate IDs, and inverted age brackets that choke core insurance portals.',
-    proposedSolution: 'An automated sanitization engine that validates employee-dependent relationships, calculates exact completed ages, flags duplicate lives, and outputs portal-ready templates.',
-    tools: ['Advanced Excel VBA', 'Python Data Scripts', 'Regex Validation'],
-    businessImpact: 'Cuts endorsement turnaround time by 75% and eliminates policy inception delays for thousands of employees.',
-    status: 'Completed',
-    published: true,
-    featured: false,
-    createdAt: '2026-09-15'
-  },
-  {
-    id: 'proj-6',
-    title: 'Cashless Pre-Auth Claim Triage Assistant (Concept)',
-    tagline: 'Exploratory experiment in flagging mismatched billing codes and non-medical surgical items.',
-    category: 'Claims Automation',
-    businessProblem: 'High volumes of cashless hospitalization requests strain TPA medical teams, leading to delayed discharge authorizations and billing disputes over non-payable items.',
-    proposedSolution: 'An AI triage concept that parses discharge summaries and hospital bill estimates against policy limits, highlighting non-payable consumables and sub-limit breaches.',
-    tools: ['LLM Vision/Document Parsing', 'Gemini API', 'Healthcare Prompt Taxonomy'],
-    businessImpact: 'Demonstration of next-generation claims automation to improve claims turnaround and reduce customer friction.',
-    status: 'Idea',
-    published: true,
-    featured: false,
-    createdAt: '2026-11-05'
   }
 ];
 
@@ -281,7 +247,7 @@ export const EDUCATION_CERTIFICATIONS: EducationCertification[] = [
     badge: 'ADVANCED INSURANCE CREDENTIAL',
     title: 'CC5 Application of AI & Gen AI in Insurance (Advanced)',
     issuer: 'Insurance Institute of India (III)',
-    yearOrStatus: 'Professional Milestone',
+    yearOrStatus: 'Completed',
     type: 'certification',
     description: 'Specialized advanced-level certification focusing on the practical implementation of Generative AI directly within the insurance domain.'
   },

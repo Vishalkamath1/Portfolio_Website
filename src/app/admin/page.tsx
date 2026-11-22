@@ -9,13 +9,15 @@ import {
   saveProjectToDb, 
   deleteProjectFromDb, 
   fetchContactMessages, 
+  saveContactMessage,
+  deleteContactMessage,
   ContactMessageRecord,
   fetchSarangReviews,
   deleteSarangReview,
   isSupabaseConfigured,
   supabase
 } from '@/lib/supabaseClient';
-import { Project, ProjectCategory, ProjectStatus, SarangReview } from '@/types';
+import { Project, ProjectCategory, ProjectStatus, PillarMode, SarangReview, normalizeProjectStatus } from '@/types';
 import { 
   FolderGit2, 
   Mail, 
@@ -42,6 +44,7 @@ import {
   Star
 } from 'lucide-react';
 import ProjectModal from '@/components/ProjectModal';
+import { BENCHMARK_EVALUATIONS } from '@/components/sections/SarangReviews';
 
 const CATEGORIES: ProjectCategory[] = [
   'GMC & GPA Underwriting AI',
@@ -50,6 +53,12 @@ const CATEGORIES: ProjectCategory[] = [
   'Insurance Analytics / Power BI',
   'Automation (Excel/Python)',
   'Experiments'
+];
+
+const PILLAR_MODES: { id: PillarMode; label: string; desc: string }[] = [
+  { id: 'Jnana Mode', label: 'Jnana Mode', desc: 'Knowledge, Chat & Specialist AI' },
+  { id: 'Karma Mode', label: 'Karma Mode', desc: 'Autonomous Execution & Processing' },
+  { id: 'Drishti Mode', label: 'Drishti Mode', desc: 'Risk Observatory & Auditing' },
 ];
 
 export default function AdminDashboardPage() {
@@ -62,16 +71,19 @@ export default function AdminDashboardPage() {
   const [messages, setMessages] = useState<ContactMessageRecord[]>([]);
   const [reviews, setReviews] = useState<SarangReview[]>([]);
   const [isDeletingReview, setIsDeletingReview] = useState<string | null>(null);
+  const [isDeletingMessage, setIsDeletingMessage] = useState<string | null>(null);
   const [isDbLive, setIsDbLive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
   // Modal / Form states
   const [previewProject, setPreviewProject] = useState<Project | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [editingProject, setEditingProject] = useState<Partial<Project>>({
     title: '',
     tagline: '',
     category: 'GMC & GPA Underwriting AI',
+    pillarMode: 'Jnana Mode',
     status: 'In Progress',
     businessProblem: '',
     proposedSolution: '',
@@ -88,10 +100,21 @@ export default function AdminDashboardPage() {
 
   // Check authentication
   useEffect(() => {
-    const auth = sessionStorage.getItem('sarang_admin_auth') || sessionStorage.getItem('sharang_admin_auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);    } else {
-      window.location.href = '/admin/login';
+    try {
+      const auth = sessionStorage.getItem('sarang_admin_auth') || sessionStorage.getItem('sharang_admin_auth');
+      if (auth === 'true') {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        try {
+          router.replace('/admin/login');
+        } catch {
+          window.location.assign('/admin/login');
+        }
+      }
+    } catch {
+      setIsAuthenticated(false);
+      window.location.assign('/admin/login');
     }
   }, [router]);
 
@@ -107,7 +130,12 @@ export default function AdminDashboardPage() {
       setMessages(loadedMessages);
 
       const loadedReviews = await fetchSarangReviews();
-      setReviews(loadedReviews);
+      // Combine static creator benchmarks with live Supabase reviews for admin moderation
+      const allAdminReviews = [
+        ...BENCHMARK_EVALUATIONS.map(b => ({ ...b, isBenchmark: true, id: b.id || `benchmark-${Math.random()}` })),
+        ...loadedReviews
+      ];
+      setReviews(allAdminReviews);
     } catch (e) {
       console.error('Error loading admin data:', e);
     } finally {
@@ -147,6 +175,11 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteReview = async (id: string) => {
+    const target = reviews.find((r) => r.id === id);
+    if (target?.isBenchmark) {
+      alert('Creator benchmark evaluations are protected baseline stress tests and cannot be deleted.');
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     setIsDeletingReview(id);
     try {
@@ -159,11 +192,25 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleDeleteMessage = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) return;
+    setIsDeletingMessage(id);
+    try {
+      await deleteContactMessage(id);
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+    } catch (e) {
+      console.error('Error deleting contact message:', e);
+    } finally {
+      setIsDeletingMessage(null);
+    }
+  };
+
   const handleOpenNewProject = () => {
     setEditingProject({
       title: '',
       tagline: '',
       category: 'GMC & GPA Underwriting AI',
+      pillarMode: 'Jnana Mode',
       status: 'In Progress',
       businessProblem: '',
       proposedSolution: '',
@@ -175,12 +222,17 @@ export default function AdminDashboardPage() {
       featured: false,
     });
     setToolsInput('Next.js, Excel, Gemini API');
+    setIsCustomCategory(false);
     setIsEditing(true);
   };
 
   const handleOpenEditProject = (proj: Project) => {
-    setEditingProject(proj);
+    setEditingProject({
+      ...proj,
+      pillarMode: proj.pillarMode || 'Jnana Mode',
+    });
     setToolsInput(proj.tools ? proj.tools.join(', ') : '');
+    setIsCustomCategory(!CATEGORIES.includes(proj.category as any));
     setIsEditing(true);
   };
 
@@ -193,13 +245,29 @@ export default function AdminDashboardPage() {
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
 
+    const canonicalStatus = normalizeProjectStatus(editingProject.status) === 'Completed'
+      ? 'Completed'
+      : (editingProject.status || 'In Progress');
+
     const payload: Partial<Project> = {
       ...editingProject,
+      status: canonicalStatus,
       tools: toolsArray,
     };
 
     const res = await saveProjectToDb(payload);
     if (res.success) {
+      // Trigger Next.js revalidation for public page
+      try {
+        await fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: '/' })
+        });
+      } catch (revErr) {
+        console.warn('Revalidation trigger error:', revErr);
+      }
+
       setSaveStatus('Saved successfully!');
       setTimeout(() => {
         setSaveStatus(null);
@@ -214,6 +282,13 @@ export default function AdminDashboardPage() {
   const handleDeleteProject = async (id: string) => {
     if (confirm('Are you sure you want to remove this project from the library?')) {
       await deleteProjectFromDb(id);
+      try {
+        await fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: '/' })
+        });
+      } catch {}
       loadData();
     }
   };
@@ -221,6 +296,13 @@ export default function AdminDashboardPage() {
   const handleTogglePublish = async (proj: Project) => {
     const updated = { ...proj, published: !proj.published };
     await saveProjectToDb(updated);
+    try {
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: '/' })
+      });
+    } catch {}
     loadData();
   };
 
@@ -231,6 +313,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
     title TEXT NOT NULL,
     tagline TEXT NOT NULL,
     category TEXT NOT NULL,
+    pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode',
     business_problem TEXT NOT NULL,
     proposed_solution TEXT NOT NULL,
     tools TEXT[] NOT NULL DEFAULT '{}',
@@ -243,9 +326,39 @@ CREATE TABLE IF NOT EXISTS public.projects (
     featured BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode';
+
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    company TEXT,
+    interest TEXT DEFAULT 'GMC & GPA Underwriting',
+    message TEXT NOT NULL,
+    read BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- Projects Policies
+DROP POLICY IF EXISTS "Public can view published projects" ON public.projects;
 CREATE POLICY "Public can view published projects" ON public.projects FOR SELECT TO anon, authenticated USING (published = true);
-CREATE POLICY "Authenticated users full access to projects" ON public.projects FOR ALL TO authenticated USING (true);`;
+
+DROP POLICY IF EXISTS "Authenticated users full access to projects" ON public.projects;
+CREATE POLICY "Authenticated users full access to projects" ON public.projects FOR ALL TO authenticated USING (true);
+
+-- Contact Messages Policies
+DROP POLICY IF EXISTS "Anyone can insert contact message" ON public.contact_messages;
+CREATE POLICY "Anyone can insert contact message" ON public.contact_messages FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Anyone can read contact messages" ON public.contact_messages;
+CREATE POLICY "Anyone can read contact messages" ON public.contact_messages FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users manage contact messages" ON public.contact_messages;
+CREATE POLICY "Authenticated users manage contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);`;
     navigator.clipboard.writeText(sql);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 2500);
@@ -259,6 +372,10 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
     );
   }
 
+  if (isAuthenticated === false) {
+    return null;
+  }
+
   const publishedCount = projects.filter((p) => p.published).length;
   const draftCount = projects.length - publishedCount;
 
@@ -269,12 +386,13 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
       <header className="glass-panel border-b border-cyan-500/20 sticky top-0 z-40 bg-navy-950/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-cyan-400 shadow-cyan-glow bg-navy-900">
+            <div className="relative w-11 h-11 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
               <Image
-                src="/images/sarang-avatar.jpg"
-                alt="SARANG AI"
+                src="/Sarang%20New%20Logo.png"
+                alt="Sarang AI Agent Logo"
                 fill
-                className="object-cover"
+                className="object-contain p-1"
+                sizes="44px"
               />
             </div>
             <div>
@@ -477,13 +595,13 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
                         {proj.category}
                       </span>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                        proj.status === 'Completed'
+                        normalizeProjectStatus(proj.status) === 'Completed'
                           ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/30'
-                          : proj.status === 'In Progress'
+                          : normalizeProjectStatus(proj.status) === 'In Progress'
                           ? 'bg-cyan-950 text-cyan-400 border border-cyan-500/30'
                           : 'bg-amber-950 text-amber-400 border border-amber-500/30'
                       }`}>
-                        {proj.status}
+                        {normalizeProjectStatus(proj.status) === 'Completed' ? 'Completed Prototype' : proj.status}
                       </span>
                       {proj.published ? (
                         <span className="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
@@ -599,6 +717,15 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
                         <span className="text-[11px] text-slate-500">
                           {new Date(m.createdAt).toLocaleDateString()}
                         </span>
+                        <button
+                          onClick={() => handleDeleteMessage(m.id)}
+                          disabled={isDeletingMessage === m.id}
+                          className="px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1 disabled:opacity-50 ml-1"
+                          title="Delete this message"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{isDeletingMessage === m.id ? 'Deleting...' : 'Delete'}</span>
+                        </button>
                       </div>
                     </div>
 
@@ -651,6 +778,11 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
                       <div>
                         <div className="text-sm font-bold text-white flex items-center gap-2">
                           <span>{rev.userName}</span>
+                          {rev.isBenchmark && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-950 text-gold-400 border border-gold-500/40">
+                              Creator Benchmark
+                            </span>
+                          )}
                           {rev.userRole && (
                             <span className="text-xs text-slate-400 font-normal">
                               ({rev.userRole})
@@ -674,22 +806,35 @@ CREATE POLICY "Authenticated users full access to projects" ON public.projects F
 
                       <div className="flex items-center gap-3">
                         <span className="text-[11px] text-slate-500">
-                          {new Date(rev.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {(() => {
+                            try {
+                              const d = new Date(rev.createdAt);
+                              if (isNaN(d.getTime())) return rev.createdAt;
+                              const month = d.toLocaleDateString('en-US', { month: 'short' });
+                              const day = String(d.getDate()).padStart(2, '0');
+                              const year = d.getFullYear();
+                              return `${month} ${day}, ${year}`;
+                            } catch {
+                              return rev.createdAt;
+                            }
+                          })()}
                         </span>
 
-                        <button
-                          onClick={() => handleDeleteReview(rev.id)}
-                          disabled={isDeletingReview === rev.id}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                          title="Delete this review permanently"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>{isDeletingReview === rev.id ? 'Deleting...' : 'Delete'}</span>
-                        </button>
+                        {rev.isBenchmark ? (
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 bg-navy-900 border border-slate-800 cursor-default" title="Static creator benchmark test">
+                            Protected
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleDeleteReview(rev.id)}
+                            disabled={isDeletingReview === rev.id}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                            title="Delete this review permanently"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>{isDeletingReview === rev.id ? 'Deleting...' : 'Delete'}</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -742,6 +887,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
     title TEXT NOT NULL,
     tagline TEXT NOT NULL,
     category TEXT NOT NULL,
+    pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode',
     business_problem TEXT NOT NULL,
     proposed_solution TEXT NOT NULL,
     tools TEXT[] NOT NULL DEFAULT '{}',
@@ -754,6 +900,9 @@ CREATE TABLE IF NOT EXISTS public.projects (
     featured BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+-- Migration for existing tables:
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS pillar_mode TEXT NOT NULL DEFAULT 'Jnana Mode';
 
 CREATE TABLE IF NOT EXISTS public.contact_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -769,10 +918,22 @@ CREATE TABLE IF NOT EXISTS public.contact_messages (
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 
+-- Projects Policies
+DROP POLICY IF EXISTS "Public can view published projects" ON public.projects;
 CREATE POLICY "Public can view published projects" ON public.projects FOR SELECT TO anon, authenticated USING (published = true);
+
+DROP POLICY IF EXISTS "Authenticated users full access to projects" ON public.projects;
 CREATE POLICY "Authenticated users full access to projects" ON public.projects FOR ALL TO authenticated USING (true);
+
+-- Contact Messages Policies
+DROP POLICY IF EXISTS "Anyone can insert contact message" ON public.contact_messages;
 CREATE POLICY "Anyone can insert contact message" ON public.contact_messages FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Authenticated users read contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);`}
+
+DROP POLICY IF EXISTS "Anyone can read contact messages" ON public.contact_messages;
+CREATE POLICY "Anyone can read contact messages" ON public.contact_messages FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users manage contact messages" ON public.contact_messages;
+CREATE POLICY "Authenticated users manage contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);`}
               </pre>
             </div>
           </div>
@@ -823,35 +984,70 @@ CREATE POLICY "Authenticated users read contact messages" ON public.contact_mess
                     Category *
                   </label>
                   <select
-                    value={editingProject.category}
-                    onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value as ProjectCategory })}
+                    value={CATEGORIES.includes(editingProject.category as any) ? editingProject.category : 'custom'}
+                    onChange={(e) => {
+                      if (e.target.value === 'custom') {
+                        setIsCustomCategory(true);
+                        setEditingProject({ ...editingProject, category: '' });
+                      } else {
+                        setIsCustomCategory(false);
+                        setEditingProject({ ...editingProject, category: e.target.value as ProjectCategory });
+                      }
+                    }}
                     className="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-400"
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
+                    <option value="custom">Custom...</option>
                   </select>
+                  {isCustomCategory && (
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter custom category name..."
+                      value={editingProject.category || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
+                      className="w-full mt-2 bg-navy-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                    />
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Development Status *
+                    Pillar Mode *
                   </label>
                   <select
-                    value={editingProject.status}
-                    onChange={(e) => setEditingProject({ ...editingProject, status: e.target.value as ProjectStatus })}
+                    required
+                    value={editingProject.pillarMode || 'Jnana Mode'}
+                    onChange={(e) => setEditingProject({ ...editingProject, pillarMode: e.target.value as PillarMode })}
                     className="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-400"
                   >
-                    <option value="Completed">Completed Prototype</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Idea">Idea / Concept</option>
+                    <option value="Jnana Mode">Jnana Mode</option>
+                    <option value="Karma Mode">Karma Mode</option>
+                    <option value="Drishti Mode">Drishti Mode</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Underwriting Business Problem *
+                  Development Status *
+                </label>
+                <select
+                  value={normalizeProjectStatus(editingProject.status) === 'Completed' ? 'Completed' : (editingProject.status || 'In Progress')}
+                  onChange={(e) => setEditingProject({ ...editingProject, status: e.target.value as ProjectStatus })}
+                  className="w-full bg-navy-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-400"
+                >
+                  <option value="Completed">Completed Prototype</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Idea">Idea / Concept</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Current Challenge *
                 </label>
                 <textarea
                   rows={3}

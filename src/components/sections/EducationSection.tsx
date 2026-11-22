@@ -17,7 +17,7 @@ export default function EducationSection() {
       }
       if (badge.toUpperCase().includes('INSURANCE')) {
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-gold-950 text-gold-300 border border-gold-500/30">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-cyan-950 text-cyan-300 border border-cyan-500/30">
             <Award className="w-3.5 h-3.5" />
             {badge}
           </span>

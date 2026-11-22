@@ -4,15 +4,51 @@ export type ProjectCategory =
   | 'GenAI Tools'
   | 'Insurance Analytics / Power BI'
   | 'Automation (Excel/Python)'
-  | 'Experiments';
+  | 'Experiments'
+  | (string & {});
 
-export type ProjectStatus = 'Idea' | 'In Progress' | 'Completed';
+export type PillarMode = 'Jnana Mode' | 'Karma Mode' | 'Drishti Mode';
+
+export type ProjectStatus = 
+  | 'Idea' 
+  | 'In Progress' 
+  | 'Completed' 
+  | 'Completed Prototype' 
+  | 'completed' 
+  | 'completed_prototype' 
+  | 'live' 
+  | (string & {});
+
+export function normalizeProjectStatus(rawStatus?: string): 'Completed' | 'In Progress' | 'Idea' {
+  const s = String(rawStatus || '').toLowerCase().trim().replace(/[-_]/g, ' ');
+  if (
+    s === 'completed' ||
+    s === 'completed prototype' ||
+    s === 'complete' ||
+    s === 'live' ||
+    s === 'production' ||
+    s === 'deployed'
+  ) {
+    return 'Completed';
+  }
+  if (
+    s === 'in progress' ||
+    s === 'active' ||
+    s === 'building' ||
+    s === 'wip' ||
+    s === 'in progress (active)'
+  ) {
+    return 'In Progress';
+  }
+  return 'Idea';
+}
 
 export interface Project {
   id: string;
   title: string;
   tagline: string;
   category: ProjectCategory;
+  pillarMode?: PillarMode | string;
   businessProblem: string;
   proposedSolution: string;
   tools: string[];
@@ -24,6 +60,7 @@ export interface Project {
   published: boolean;
   featured?: boolean;
   createdAt: string;
+  agentId?: string;
 }
 
 export interface ExpertiseItem {
@@ -80,5 +117,6 @@ export interface SarangReview {
   rating: number; // 1 to 5
   reviewText: string;
   createdAt: string;
+  isBenchmark?: boolean;
 }
 

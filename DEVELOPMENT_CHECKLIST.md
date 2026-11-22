@@ -25,6 +25,8 @@
 
 ## 2. WEBSITE DESIGN & 7 CORE SECTIONS (PHASE 2)
 - [x] Section 1: Hero Section (Branding, headline, supporting copy, dual CTAs, Archer Guardian visual)
+  - [x] Cinematic Character Animation (Zero-G vertical float `@keyframes smooth-hover`, concentric holographic ripple energy platform `@keyframes ripple-out`, rotating platform ring `@keyframes platform-rotate`, breathing ambient aura, holographic nameplate, and full interactive integration with live Sarang Chat Copilot)
+  - [x] Accessibility: Full `@media (prefers-reduced-motion: reduce)` motion-safety compliance
 - [x] Section 2: About Me (7.4 yrs insurance career: 2.9y Life + 4.5y GMC/GPA underwriting, transition to AI)
 - [x] Section 3: Expertise (7 professional cards: GMC, GPA, Operations, Advanced Excel, AI Tools/Prompt Engineering, Process Automation, AI in Insurance)
 - [x] Section 4: AI Projects Library (Searchable, filterable by category, detailed project modal)

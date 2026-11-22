@@ -22,11 +22,13 @@ import {
   TrendingUp,
   Sliders,
   Eye,
-  Clock
+  Clock,
+  Star
 } from 'lucide-react';
 import { OWNER_PROFILE } from '@/data/portfolioData';
 import { ChatMessage, SpecialistMode } from '@/types';
 import SarangReviews from './SarangReviews';
+import { useAgentChat, SPECIALIST_AGENTS, AGENT_BADGES, AGENT_PLACEHOLDERS, AGENT_GREETINGS, GENERAL_JNANA_GREETING } from '@/context/AgentChatContext';
 
 export type SarangTab = 'jnana' | 'karma' | 'drishti';
 
@@ -64,15 +66,6 @@ const SARANG_TABS: {
     isLocked: true,
     icon: Activity
   }
-];
-
-const SPECIALIST_MODES: { id: SpecialistMode; name: string; desc: string; icon: any }[] = [
-  { id: 'general', name: 'General', desc: 'Overview & Portfolio queries', icon: Sparkles },
-  { id: 'underwriting', name: 'Underwriting', desc: 'GMC & GPA risk, ICR & burn costing', icon: Cpu },
-  { id: 'claims', name: 'Claims', desc: 'Cashless pre-auth & exclusions', icon: Activity },
-  { id: 'knowledge', name: 'Knowledge', desc: 'IRDAI regulations & policy clauses', icon: BookOpen },
-  { id: 'analytics', name: 'Analytics', desc: 'Loss ratios & Excel models', icon: Layers },
-  { id: 'automation', name: 'Automation', desc: 'Census cleaning & AI pipelines', icon: Zap },
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -436,17 +429,111 @@ function DrishtiDashboard() {
   );
 }
 
+const QUICK_PROMPTS: Record<string, string[]> = {
+  'gpa-claims-helpdesk': [
+    "Assess Permanent Partial Disablement (PPD) claim for loss of toe index.",
+    "Evaluate insurer rejection based on delayed claim intimation in GPA.",
+    "Draft a 3-tier grievance escalation letter for an accidental injury claim."
+  ],
+  'irdai-health-decoder': [
+    "Decode IRDAI master circular on cashless turnaround times (1-hour/3-hour).",
+    "Explain moratorium period rules after 60 months of continuous coverage.",
+    "Compare standard room-rent capping vs proportionate deduction clause."
+  ],
+  'insurance-ai-architect': [
+    "How to calculate burning cost for an 850-life corporate GMC renewal?",
+    "Model loss ratio impact of introducing a 15% parental co-pay.",
+    "Design an automated underwriter census sanitization pipeline."
+  ],
+  'gmc-gpa-knowledge-hub': [
+    "Explain difference between Risk Class I, II, and III in GPA underwriting.",
+    "Standard market benchmarks for corporate maternity sub-limits.",
+    "How to structure corporate buffer clauses for critical illnesses?"
+  ],
+  general: [
+    "Explain key risk assessment techniques in GMC & GPA underwriting.",
+    "How does an automated burn cost model calculate renewal pricing?",
+    "Evaluate portfolio ICR trends: what triggers premium loadings?"
+  ]
+};
+
 /* -------------------------------------------------------------------------- */
 /* Main Agent Section Component (Single Platform Architecture)                */
 /* -------------------------------------------------------------------------- */
 export default function AgentSection() {
-  const [activeTab, setActiveTab] = useState<SarangTab>('jnana');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { 
+    activeTab,
+    setActiveTab,
+    activeAgentId, 
+    setActiveAgentId,
+    messages, 
+    setMessages, 
+    openSpecialistChat,
+    openHeroChat,
+    activeAgent,
+    resetChat
+  } = useAgentChat();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeMode, setActiveMode] = useState<SpecialistMode>('general');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatScrollContainerRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Sync activeMode with activeAgentId
+  useEffect(() => {
+    if (!activeAgentId) {
+      setActiveMode('general');
+    } else if (activeAgentId === 'gmc-gpa-knowledge-hub') {
+      setActiveMode('underwriting');
+    } else if (activeAgentId === 'gpa-claims-helpdesk') {
+      setActiveMode('claims');
+    } else if (activeAgentId === 'irdai-health-decoder') {
+      setActiveMode('knowledge');
+    } else if (activeAgentId === 'insurance-ai-architect') {
+      setActiveMode('automation');
+    }
+  }, [activeAgentId]);
+
+  // Clean up any in-flight stream on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeAgentId && activeTab !== 'jnana') {
+      setActiveTab('jnana');
+    }
+  }, [activeAgentId, activeTab]);
+
+  // Safety fallback for greeting initialization if messages list is empty
+  useEffect(() => {
+    if (messages.length === 0) {
+      if (activeAgentId && AGENT_GREETINGS[activeAgentId]) {
+        setMessages([
+          {
+            id: `agent-greeting-${activeAgentId}-${Date.now()}`,
+            sender: 'sarang',
+            text: AGENT_GREETINGS[activeAgentId],
+            timestamp: 'Just now',
+          }
+        ]);
+      } else {
+        setMessages([
+          {
+            id: `agent-greeting-general-${Date.now()}`,
+            sender: 'sarang',
+            text: GENERAL_JNANA_GREETING,
+            timestamp: 'Just now',
+          }
+        ]);
+      }
+    }
+  }, [activeAgentId, messages.length, setMessages]);
 
   const scrollToBottom = (smooth = true) => {
     if (chatScrollContainerRef.current) {
@@ -459,11 +546,19 @@ export default function AgentSection() {
     }
   };
 
+  // Auto-scroll chat container to bottom during active conversation or streaming
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 1 || isLoading) {
       scrollToBottom();
     }
   }, [messages.length, isLoading]);
+
+  // Clean single scroll-to-top reset for chat container on mode switch
+  useEffect(() => {
+    if (activeAgentId && chatScrollContainerRef.current) {
+      chatScrollContainerRef.current.scrollTop = 0;
+    }
+  }, [activeAgentId]);
 
   // Intelligent demo response generator when Gemini API route is running in demo mode
   const getDemoResponse = (query: string, mode: SpecialistMode): string => {
@@ -572,17 +667,38 @@ Feel free to ask more specific questions regarding:
       timestamp: 'Just now'
     };
 
+    // Include the active session's prior messages (including initial UI activation greeting)
+    const chatHistory = messages
+      .filter((m) => m.text && m.text.trim().length > 0)
+      .map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'model',
+        sender: m.sender,
+        text: m.text
+      }));
+
     // Immediately push user message and placeholder assistant message for instant UI feedback
     setMessages((prev) => [...prev, userMessage, initialAiMessage]);
     setInput('');
     setIsLoading(true);
+
+    // Abort any existing stream before starting a new one
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
       // Connect to the streaming /api/jnana Gemini route
       const response = await fetch('/api/jnana', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: query, mode: activeMode })
+        signal: abortController.signal,
+        body: JSON.stringify({ 
+          message: query, 
+          mode: activeAgentId || activeMode || 'general',
+          chatHistory 
+        })
       });
 
       if (!response.ok || !response.body) {
@@ -616,7 +732,11 @@ Feel free to ask more specific questions regarding:
           )
         );
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        console.log('[Jnana Chat] Stream aborted by reset');
+        return;
+      }
       console.warn('[Jnana Chat] Streaming error, using domain fallback:', err);
       setMessages((prev) =>
         prev.map((msg) =>
@@ -624,12 +744,36 @@ Feel free to ask more specific questions regarding:
         )
       );
     } finally {
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
       setIsLoading(false);
     }
   };
 
-  const handleResetChat = () => {
-    setMessages([]);
+  const handleResetChat = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 1. Immediately abort any in-flight streaming fetch
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch {
+        // ignore
+      }
+      abortControllerRef.current = null;
+    }
+
+    // 2. Clear input and loading state
+    setIsLoading(false);
+    setInput('');
+    setActiveMode('general');
+
+    // 3. Trigger clean context reset back to General Jnana mode
+    resetChat();
   };
 
   const currentTab = SARANG_TABS.find(t => t.id === activeTab) || SARANG_TABS[0];
@@ -651,13 +795,23 @@ Feel free to ask more specific questions regarding:
           <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Meet Sarang — Unified Insurance Intelligence
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-slate-300 font-medium">
-            A single tripartite AI platform bridging domain underwriting, execution automation, and risk monitoring.
-          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <span className="text-xs sm:text-sm text-slate-300 font-medium">
+              A single tripartite AI platform bridging domain underwriting, execution automation, and risk monitoring.
+            </span>
+            <a
+              href="#sarang-reviews"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-950/80 border border-gold-500/40 text-gold-300 text-xs font-bold hover:border-gold-400 transition-all shadow-sm"
+            >
+              <span>★ 5.0 Benchmark</span>
+              <span className="text-slate-400">•</span>
+              <span className="underline decoration-gold-500/50">Evaluations & Reviews ↓</span>
+            </a>
+          </div>
         </div>
 
         {/* Sleek Tabbed Platform Navigation Menu */}
-        <div className="max-w-4xl mx-auto mb-10">
+        <div id="sarang-workspace-top" className="max-w-4xl mx-auto mb-6 scroll-mt-24">
           <div className="p-1.5 sm:p-2 rounded-2xl glass-card border border-cyan-500/30 bg-navy-950/80 shadow-2xl grid grid-cols-3 gap-2">
             {SARANG_TABS.map((tab) => {
               const Icon = tab.icon;
@@ -665,7 +819,16 @@ Feel free to ask more specific questions regarding:
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    if (tab.id === 'jnana') {
+                      if (chatScrollContainerRef.current) {
+                        chatScrollContainerRef.current.scrollTop = 0;
+                      }
+                      openHeroChat();
+                    } else {
+                      setActiveTab(tab.id);
+                    }
+                  }}
                   className={`relative py-3.5 px-2 sm:px-6 rounded-xl transition-all duration-300 w-full flex flex-col items-center justify-center group ${
                     isActive
                       ? 'bg-gradient-to-r from-cyan-950/90 via-navy-900 to-blue-950/90 text-white border border-cyan-400 shadow-cyan-glow'
@@ -698,17 +861,6 @@ Feel free to ask more specific questions regarding:
               );
             })}
           </div>
-
-          {/* Active Tab Mission Tagline Display */}
-          <div className="mt-4 flex items-center justify-center">
-            <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-navy-900/90 border border-cyan-500/30 shadow-md backdrop-blur-md text-xs sm:text-sm">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0" />
-              <span className="text-slate-400 font-medium">Tagline:</span>
-              <span className="text-white font-bold tracking-wide italic">
-                "{currentTab.tagline}"
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Tab 1: JNANA (WISDOM) — The Interactive Chat Console */}
@@ -721,12 +873,13 @@ Feel free to ask more specific questions regarding:
               {/* Visual Identity Card */}
               <div className="glass-card rounded-2xl p-6 border-cyan-500/30 overflow-hidden relative group">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-cyan-400 shadow-cyan-glow bg-navy-950 shrink-0">
+                  <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
                     <Image
-                      src="/sarang-guardian.jpeg"
-                      alt="Sarang - Your Intelligent Companion"
+                      src="/Sarang%20New%20Logo.png"
+                      alt="Sarang AI Agent Logo"
                       fill
-                      className="object-cover"
+                      className="object-contain p-1"
+                      sizes="64px"
                     />
                   </div>
                   <div>
@@ -736,12 +889,27 @@ Feel free to ask more specific questions regarding:
                         Online
                       </span>
                     </h3>
-                    <p className="text-xs text-gold-400 font-semibold tracking-wide">
-                      Sarang - Your Intelligent Companion
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      LEARN • EXECUTE • MONITOR
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-xs text-gold-400 font-semibold tracking-wide">
+                        Enterprise Insurance Intelligence
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3-metric Domain Authority strip */}
+                <div className="grid grid-cols-3 gap-2 my-3 p-2.5 rounded-xl bg-navy-950/90 border border-slate-800/90 text-center">
+                  <div>
+                    <div className="text-xs font-black text-cyan-400">7+ Years</div>
+                    <div className="text-[9px] text-slate-400 uppercase font-semibold leading-tight">Domain Expert- GMC & GPA</div>
+                  </div>
+                  <div className="border-x border-slate-800">
+                    <div className="text-xs font-black text-gold-400">3 Engines</div>
+                    <div className="text-[9px] text-slate-400 uppercase font-semibold leading-tight">JNANA, KARMA, DRISHTI</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-emerald-400">IRDAI</div>
+                    <div className="text-[9px] text-slate-400 uppercase font-semibold">Aligned</div>
                   </div>
                 </div>
 
@@ -756,21 +924,24 @@ Feel free to ask more specific questions regarding:
                   </p>
                 </div>
 
-                {/* Specialist Modes Selector */}
+                {/* Special Ability Modes Selector */}
                 <div className="pt-4 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
-                    <span>Specialist Domain Modes</span>
-                    <span className="text-cyan-400 font-semibold">{activeMode}</span>
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <span>Special Ability Modes</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
-                    {SPECIALIST_MODES.map((mode) => {
-                      const Icon = mode.icon;
-                      const isActive = activeMode === mode.id;
+                    {SPECIALIST_AGENTS.map((agent) => {
+                      const isActive = activeAgentId === agent.id;
                       return (
                         <button
-                          key={mode.id}
-                          onClick={() => setActiveMode(mode.id)}
+                          key={agent.id}
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openSpecialistChat(agent.id, { forceScroll: true });
+                          }}
                           className={`p-2.5 rounded-xl text-left border transition-all flex flex-col justify-between ${
                             isActive
                               ? 'bg-cyan-950/90 border-cyan-400 shadow-cyan-glow text-white'
@@ -778,12 +949,15 @@ Feel free to ask more specific questions regarding:
                           }`}
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-bold">{mode.name}</span>
-                            <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+                            <span className="text-[11px] font-bold leading-tight line-clamp-1">{agent.badge}</span>
+                            <Sparkles className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
                           </div>
-                          <span className="text-[10px] text-slate-400 line-clamp-1">
-                            {mode.desc}
-                          </span>
+                          <p 
+                            style={{ writingMode: 'horizontal-tb', wordBreak: 'break-word' }}
+                            className="text-[10px] text-slate-400 line-clamp-1"
+                          >
+                            {agent.description || agent.desc}
+                          </p>
                         </button>
                       );
                     })}
@@ -802,62 +976,81 @@ Feel free to ask more specific questions regarding:
             </div>
 
             {/* Right Column: Interactive Chat Interface */}
-            <div className="lg:col-span-7">
-              <div className="glass-panel-glow rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col h-[650px] overflow-hidden bg-navy-950/90">
+            <div id="sarang-chat" className="lg:col-span-7 scroll-mt-24">
+              <div className="glass-panel-glow rounded-2xl border border-cyan-500/30 shadow-2xl flex flex-col h-[420px] lg:h-[450px] overflow-hidden bg-navy-950/90">
                 
                 {/* Chat Header */}
-                <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-navy-900/80 backdrop-blur-md">
+                <div className="p-3.5 sm:p-4 border-b border-slate-800 flex items-center justify-between bg-navy-900/80 backdrop-blur-md">
                   <div className="flex items-center gap-3">
-                    <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/50">
+                    <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow shrink-0">
                       <Image
-                        src="/sarang-guardian.jpeg"
-                        alt="Sarang - Your Intelligent Companion"
+                        src="/Sarang%20New%20Logo.png"
+                        alt="Sarang AI Agent Logo"
                         fill
-                        className="object-cover"
+                        className="object-contain p-1"
+                        sizes="40px"
                       />
                     </div>
                     <div>
                       <div className="text-sm font-bold text-white flex items-center gap-2">
                         <span>Sarang - Your Intelligent Companion</span>
-                        <span className="text-[10px] text-cyan-300 bg-cyan-950 border border-cyan-500/30 px-2 py-0.5 rounded font-semibold uppercase tracking-wider">
-                          {currentTab.name} Mode
-                        </span>
                       </div>
-                      <div className="text-[11px] text-slate-400">
-                        LEARN • EXECUTE • MONITOR
+                      <div className="text-[11px] text-cyan-400 font-medium truncate max-w-[200px] sm:max-w-[300px]">
+                        {activeAgent ? `Active: ${activeAgent.badge}` : 'LEARN • EXECUTE • MONITOR'}
                       </div>
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleResetChat}
-                    className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
-                    title="Reset Conversation"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (activeAgentId) handleResetChat(e);
+                      }}
+                      className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-navy-950/90 border border-cyan-500/30 text-[10px] font-bold text-cyan-300 tracking-wider uppercase transition-colors ${
+                        activeAgentId ? 'hover:border-cyan-400 cursor-pointer' : 'cursor-default'
+                      }`}
+                      title={activeAgentId ? 'Click to return to General GMC & GPA Mode' : 'Active Domain Engine'}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                      <span className="truncate max-w-[180px]">
+                        {activeAgent ? activeAgent.badge : 'JNANA DOMAIN ENGINE'}
+                      </span>
+                      {activeAgentId && <span className="text-slate-400 hover:text-white ml-0.5">×</span>}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResetChat}
+                      className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+                      title="Reset Conversation"
+                    >
+                      <RotateCcw className="w-4 h-4"/>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Messages Scroll Area */}
                 <div 
                   ref={chatScrollContainerRef}
-                  className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"
+                  className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-[radial-gradient(rgba(56,189,248,0.08)_1px,transparent_1px)] [background-size:18px_18px]"
                 >
                   {messages.length === 0 ? (
-                    <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/40 shadow-cyan-glow mb-3 bg-navy-900">
+                    <div className="h-full min-h-[180px] flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-cyan-glow mb-3">
                         <Image
-                          src="/sarang-guardian.jpeg"
-                          alt="Sarang AI"
+                          src="/Sarang%20New%20Logo.png"
+                          alt="Sarang AI Agent Logo"
                           fill
-                          className="object-cover"
+                          className="object-contain p-1"
+                          sizes="48px"
                         />
                       </div>
                       <p className="text-xs text-slate-300 font-semibold mb-1">
-                        Jnana Intelligence Assistant
+                        Sarang - Your Intelligent Companion
                       </p>
                       <p className="text-[11px] text-slate-500 max-w-xs">
-                        Ask any insurance underwriting or technical question below to start the conversation.
+                        Ask any insurance underwriting or technical question below or select a recommended prompt to start.
                       </p>
                     </div>
                   ) : (
@@ -866,26 +1059,43 @@ Feel free to ask more specific questions regarding:
                         key={msg.id}
                         className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                       >
-                        <div className="flex items-end gap-2 max-w-[88%] sm:max-w-[80%]">
+                        <div className="flex items-end gap-2 max-w-[90%] sm:max-w-[85%]">
                           {msg.sender === 'sarang' && (
-                            <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0 bg-navy-900">
+                            <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/50 bg-cyan-950 shadow-sm shrink-0">
                               <Image
-                                src="/sarang-guardian.jpeg"
-                                alt="Sarang - Your Intelligent Companion"
+                                src="/Sarang%20New%20Logo.png"
+                                alt="Sarang AI Agent Logo"
                                 fill
-                                className="object-cover"
+                                className="object-contain p-0.5"
+                                sizes="32px"
                               />
                             </div>
                           )}
 
                           <div
-                            className={`rounded-2xl p-4 text-xs sm:text-sm leading-relaxed ${
+                            className={`text-xs sm:text-sm leading-relaxed ${
                               msg.sender === 'user'
-                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-br-none shadow-cyan-glow'
-                                : 'glass-panel border-cyan-500/20 text-slate-200 rounded-bl-none shadow-md'
+                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl rounded-br-none p-3.5 shadow-cyan-glow'
+                                : 'border-l-2 border-l-cyan-400 bg-navy-900/90 border border-slate-800/90 rounded-2xl rounded-tl-sm p-3.5 shadow-lg text-slate-200'
                             }`}
                           >
-                            <div className="whitespace-pre-line prose prose-invert prose-sm max-w-none">
+                            {msg.sender === 'sarang' && (
+                              <div className="flex items-center justify-between text-[10px] pb-1.5 mb-2 border-b border-slate-800/80 text-slate-400">
+                                <span className="font-bold text-cyan-400 tracking-wide truncate max-w-[220px]">
+                                  {activeAgent ? activeAgent.badge : 'Sarang'}
+                                </span>
+                                {msg.timestamp && (
+                                  <span className="text-[10px] text-slate-500 font-medium shrink-0 ml-2">
+                                    {msg.timestamp}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            <div 
+                              style={{ writingMode: 'horizontal-tb', wordBreak: 'break-word' }}
+                              className="whitespace-pre-line prose prose-invert prose-sm max-w-none"
+                            >
                               {msg.text ? (
                                 <>
                                   {msg.text}
@@ -907,11 +1117,38 @@ Feel free to ask more specific questions regarding:
                     ))
                   )}
 
+                  {/* Starter Chips: Rendered ONLY for the 4 Specialist AI Projects */}
+                  {activeAgentId && messages.length <= 1 && !isLoading && (
+                    <div className="pt-2 pb-1 space-y-2 animate-fadeIn">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <span>Recommended Underwriting Prompts</span>
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        {(QUICK_PROMPTS[activeAgentId] || []).map((promptText, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setInput(promptText);
+                              const inputEl = document.getElementById('sarang-inline-input') as HTMLInputElement | null;
+                              inputEl?.focus();
+                            }}
+                            className="text-left text-xs px-3 py-2 rounded-xl bg-navy-900/80 hover:bg-cyan-950/60 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-between group shadow-sm"
+                          >
+                            <span className="line-clamp-1">{promptText}</span>
+                            <ArrowRight className="w-3 h-3 text-cyan-400/60 group-hover:text-cyan-300 shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Form */}
-                <div className="p-3 sm:p-4 bg-navy-900/80 border-t border-slate-800">
+                {/* Input Form & Command Dock */}
+                <div className="p-3 sm:p-3.5 bg-navy-900/90 border-t border-slate-800">
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -920,22 +1157,26 @@ Feel free to ask more specific questions regarding:
                     className="flex items-center gap-2"
                   >
                     <input
+                      id="sarang-inline-input"
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      placeholder={`Ask about GMC underwriting, burn cost, ICR or ${OWNER_PROFILE.name}'s projects...`}
+                      placeholder={(activeAgentId && AGENT_PLACEHOLDERS[activeAgentId]) || activeAgent?.placeholder || `Ask about GMC underwriting, burn cost, ICR or ${OWNER_PROFILE.name}'s projects...`}
                       disabled={isLoading}
-                      className="flex-1 bg-navy-950 border border-slate-700/80 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors shadow-inner"
+                      className="flex-1 bg-navy-950 border border-slate-700/80 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors shadow-inner"
                     />
                     <button
                       type="submit"
                       disabled={!input.trim() || isLoading}
-                      className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-navy-950 font-bold hover:from-cyan-400 hover:to-blue-500 disabled:opacity-40 disabled:pointer-events-none transition-all shadow-cyan-glow shrink-0"
+                      className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-navy-950 font-bold hover:from-cyan-400 hover:to-blue-500 disabled:opacity-40 disabled:pointer-events-none transition-all shadow-cyan-glow shrink-0"
                       aria-label="Send message"
                     >
                       <Send className="w-4 h-4" />
                     </button>
                   </form>
+                  <div className="mt-2 text-center text-[10px] text-slate-500 font-medium tracking-wide">
+                    Built on 7+ Years of GMC & GPA Underwriting Expertise • Press Enter ↵ to send
+                  </div>
                 </div>
 
               </div>

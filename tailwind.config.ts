@@ -9,6 +9,13 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
+      spacing: {
+        '18': '4.5rem',
+        '22': '5.5rem',
+      },
+      zIndex: {
+        '25': '25',
+      },
       colors: {
         navy: {
           950: "#040711",

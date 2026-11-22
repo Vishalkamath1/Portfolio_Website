@@ -112,7 +112,7 @@ export default function AboutSection() {
             {CAREER_JOURNEY.map((item, idx) => (
               <div
                 key={idx}
-                className="glass-card rounded-2xl p-6 relative flex flex-col justify-between hover:border-cyan-400/50 transition-all group"
+                className="glass-card rounded-2xl p-6 relative flex flex-col justify-start hover:border-cyan-400/50 transition-all group"
               >
                 {/* Step indicator */}
                 <div className="flex items-center justify-between mb-4">
