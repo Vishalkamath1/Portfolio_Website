@@ -16,26 +16,7 @@ import {
 import { SarangReview } from '@/types';
 import { fetchSarangReviews, saveSarangReview } from '@/lib/supabaseClient';
 
-export const BENCHMARK_EVALUATIONS: SarangReview[] = [
-  {
-    id: 'benchmark-gpa-claims',
-    userName: 'Developer Evaluation (Vishal Kamath)',
-    userRole: 'GPA Claims Helpdesk · Benchmark Test',
-    rating: 5,
-    reviewText: 'Stress-tested against rejected Permanent Partial Disablement (PPD) and Temporary Total Disablement (TTD) cases. Maps medical findings to IRDAI disability grids and generates multi-tier grievance escalations.',
-    createdAt: '2026-11-10T14:30:00.000Z',
-    isBenchmark: true
-  },
-  {
-    id: 'benchmark-irdai-decoder',
-    userName: 'Developer Evaluation (Vishal Kamath)',
-    userRole: 'IRDAI Circular Decoder · Benchmark Test',
-    rating: 5,
-    reviewText: 'Verified on IRDAI Health Insurance Master Circular mandates—translates 1-hour cashless pre-auth, 3-hour discharge timelines, and 5-year moratorium rules into plain-English underwriting matrices.',
-    createdAt: '2026-11-08T09:15:00.000Z',
-    isBenchmark: true
-  }
-];
+export const BENCHMARK_EVALUATIONS: SarangReview[] = [];
 
 export default function SarangReviews() {
   const [reviews, setReviews] = useState<SarangReview[]>([]);
@@ -44,10 +25,8 @@ export default function SarangReviews() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Combine live Supabase reviews with developer benchmark evaluations
-  const allReviews = React.useMemo(() => {
-    return [...reviews, ...BENCHMARK_EVALUATIONS];
-  }, [reviews]);
+  // Render exclusively real approved Supabase reviews
+  const allReviews = reviews;
 
   // Form State
   const [rating, setRating] = useState<number>(5);
@@ -123,11 +102,11 @@ export default function SarangReviews() {
   const totalCount = allReviews.length;
   const averageRating = totalCount > 0 
     ? (allReviews.reduce((acc, r) => acc + r.rating, 0) / totalCount).toFixed(1)
-    : '5.0';
+    : '0.0';
 
   const distribution = [5, 4, 3, 2, 1].map((stars) => {
     const count = allReviews.filter((r) => r.rating === stars).length;
-    const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : (stars === 5 ? 100 : 0);
+    const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
     return { stars, count, percentage };
   });
 
@@ -458,7 +437,6 @@ export default function SarangReviews() {
                         <ThumbsUp className="w-3 h-3" />
                         <span>{isVotedHelpful ? 'Helpful (1)' : 'Helpful'}</span>
                       </button>
-                      <span className="text-[10px] text-slate-500">Sarang AI Advisory Review</span>
                     </div>
                   </div>
                 );

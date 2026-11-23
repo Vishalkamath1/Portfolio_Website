@@ -2,18 +2,20 @@
 
 import React from 'react';
 import { SarangReview } from '@/types';
-import { Star, Trash2 } from 'lucide-react';
+import { Star, Trash2, CheckCircle2 } from 'lucide-react';
 
 interface AdminReviewsTabProps {
   reviews: SarangReview[];
   onDeleteReview: (id: string) => void;
   isDeletingReview: string | null;
+  onApproveReview?: (id: string, approved: boolean) => void;
 }
 
 export default function AdminReviewsTab({
   reviews,
   onDeleteReview,
-  isDeletingReview
+  isDeletingReview,
+  onApproveReview
 }: AdminReviewsTabProps) {
   return (
     <div className="space-y-6">
@@ -53,9 +55,9 @@ export default function AdminReviewsTab({
                 <div>
                   <div className="text-sm font-bold text-white flex items-center gap-2">
                     <span>{rev.userName}</span>
-                    {rev.isBenchmark && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gold-950 text-gold-400 border border-gold-500/40">
-                        Creator Benchmark
+                    {rev.approved === false && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-950 text-amber-400 border border-amber-500/40">
+                        Pending
                       </span>
                     )}
                     {rev.userRole && (
@@ -95,21 +97,25 @@ export default function AdminReviewsTab({
                     })()}
                   </span>
 
-                  {rev.isBenchmark ? (
-                    <span className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 bg-navy-900 border border-slate-800 cursor-default" title="Static creator benchmark test">
-                      Protected
-                    </span>
-                  ) : (
+                  {rev.approved === false && onApproveReview && (
                     <button
-                      onClick={() => onDeleteReview(rev.id)}
-                      disabled={isDeletingReview === rev.id}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                      title="Delete this review permanently"
+                      onClick={() => onApproveReview(rev.id, true)}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-emerald-100 bg-emerald-950/60 border border-emerald-500/30 hover:bg-emerald-900/60 transition-colors flex items-center gap-1.5"
+                      title="Approve this review"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>{isDeletingReview === rev.id ? 'Deleting...' : 'Delete'}</span>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Approve</span>
                     </button>
                   )}
+                  <button
+                    onClick={() => onDeleteReview(rev.id)}
+                    disabled={isDeletingReview === rev.id}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-300 hover:text-rose-100 bg-rose-950/60 border border-rose-500/30 hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                    title="Delete this review permanently"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{isDeletingReview === rev.id ? 'Deleting...' : 'Delete'}</span>
+                  </button>
                 </div>
               </div>
 

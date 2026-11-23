@@ -378,33 +378,36 @@ export async function deleteContactMessage(id: string): Promise<boolean> {
 // ==============================================================================
 // Sarang Reviews & Ratings Data Access Layer
 // ==============================================================================
+// Cache Revalidation Helper
+// ==============================================================================
 
-export const INITIAL_REVIEWS: SarangReview[] = [
-  {
-    id: 'rev-1',
-    userName: 'Rohan Deshmukh',
-    userRole: 'Chief Underwriting Officer',
-    rating: 5,
-    reviewText: 'The burn cost explanation and GMC clause cross-referencing capabilities of Sarang AI are phenomenal. It reflects genuine ground-level Indian corporate health underwriting nuances.',
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
-    id: 'rev-2',
-    userName: 'Ananya Sengupta',
-    userRole: 'Senior Broker Consultant, Marsh McLennan',
-    rating: 5,
-    reviewText: 'Extremely impressed by the ICR calculation breakdowns and demographic morbidity weighting. This is the practical AI tool the industry has needed for years.',
-    createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-  },
-  {
-    id: 'rev-3',
-    userName: 'Vikram Malhotra',
-    userRole: 'Corporate Health VP, Zurich Kotak',
-    rating: 5,
-    reviewText: 'Crisp understanding of IRDAI Class I/II/III hazard categories for GPA. The underwriter-in-the-loop logic gives high confidence.',
-    createdAt: new Date(Date.now() - 86400000 * 8).toISOString(),
+export async function triggerRevalidation(path: string = '/'): Promise<boolean> {
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    const secret = process.env.NEXT_PUBLIC_REVALIDATION_SECRET || (typeof window !== 'undefined' ? (window as any).__REVALIDATION_SECRET : '');
+    if (secret) {
+      headers['x-revalidation-token'] = secret;
+    }
+
+    const res = await fetch('/api/revalidate', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ path }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Revalidation trigger error:', err);
+    return false;
   }
-];
+}
+
+// ==============================================================================
+// Sarang Reviews & Ratings Data Access Layer
+// ==============================================================================
+
+export const INITIAL_REVIEWS: SarangReview[] = [];
 
 export async function fetchSarangReviews(): Promise<SarangReview[]> {
   if (supabase) {
@@ -419,15 +422,18 @@ export async function fetchSarangReviews(): Promise<SarangReview[]> {
 
       const { data, error } = (await Promise.race([fetchPromise, timeoutPromise])) as any;
 
-      if (!error && data && data.length > 0) {
-        return data.map((d: any) => ({
-          id: d.id,
-          userName: d.user_name,
-          userRole: d.user_role || '',
-          rating: Number(d.rating) || 5,
-          reviewText: d.review_text,
-          createdAt: d.created_at,
-        }));
+      if (!error && data) {
+        return data
+          .filter((d: any) => d.approved === undefined || d.approved === true || d.status === 'approved')
+          .map((d: any) => ({
+            id: d.id,
+            userName: d.user_name,
+            userRole: d.user_role || '',
+            rating: Number(d.rating) || 5,
+            reviewText: d.review_text,
+            createdAt: d.created_at,
+            approved: d.approved !== false,
+          }));
       }
     } catch (e) {
       console.warn('Supabase fetch reviews error, fallback to local store:', e);
@@ -438,12 +444,15 @@ export async function fetchSarangReviews(): Promise<SarangReview[]> {
     const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((d: any) => d.approved === undefined || d.approved === true || d.status === 'approved');
+        }
       } catch (e) {}
     }
   }
 
-  return INITIAL_REVIEWS;
+  return [];
 }
 
 export async function saveSarangReview(review: Omit<SarangReview, 'id' | 'createdAt'>): Promise<{ success: boolean; review?: SarangReview; error?: string }> {
@@ -454,6 +463,7 @@ export async function saveSarangReview(review: Omit<SarangReview, 'id' | 'create
     rating: Math.max(1, Math.min(5, Number(review.rating) || 5)),
     reviewText: review.reviewText.trim(),
     createdAt: new Date().toISOString(),
+    approved: true,
   };
 
   if (supabase) {
@@ -466,6 +476,7 @@ export async function saveSarangReview(review: Omit<SarangReview, 'id' | 'create
           rating: newReview.rating,
           review_text: newReview.reviewText,
           created_at: newReview.createdAt,
+          approved: true,
         }
       ]);
       if (error) {
@@ -478,10 +489,12 @@ export async function saveSarangReview(review: Omit<SarangReview, 'id' | 'create
 
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
-    const list: SarangReview[] = saved ? JSON.parse(saved) : [...INITIAL_REVIEWS];
+    const list: SarangReview[] = saved ? JSON.parse(saved) : [];
     list.unshift(newReview);
     localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(list));
   }
+
+  triggerRevalidation('/').catch(() => {});
 
   return { success: true, review: newReview };
 }
@@ -490,8 +503,8 @@ export async function deleteSarangReview(id: string): Promise<boolean> {
   if (supabase) {
     try {
       const { error } = await supabase.from('sarang_reviews').delete().eq('id', id);
-      if (!error) {
-        // successfully deleted in supabase
+      if (error) {
+        console.warn('Supabase delete review error:', error);
       }
     } catch (e) {
       console.warn('Supabase delete review error:', e);
@@ -500,10 +513,47 @@ export async function deleteSarangReview(id: string): Promise<boolean> {
 
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
-    const list: SarangReview[] = saved ? JSON.parse(saved) : [...INITIAL_REVIEWS];
+    const list: SarangReview[] = saved ? JSON.parse(saved) : [];
     const filtered = list.filter((r) => r.id !== id);
     localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(filtered));
   }
+
+  triggerRevalidation('/').catch(() => {});
+
+  return true;
+}
+
+export async function updateSarangReview(id: string, updates: Partial<SarangReview>): Promise<boolean> {
+  if (supabase) {
+    try {
+      const dbUpdates: any = {};
+      if (updates.approved !== undefined) dbUpdates.approved = updates.approved;
+      if (updates.userName) dbUpdates.user_name = updates.userName;
+      if (updates.userRole !== undefined) dbUpdates.user_role = updates.userRole;
+      if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
+      if (updates.reviewText) dbUpdates.review_text = updates.reviewText;
+
+      const { error } = await supabase.from('sarang_reviews').update(dbUpdates).eq('id', id);
+      if (error) {
+        console.warn('Supabase update review error:', error);
+      }
+    } catch (e) {
+      console.warn('Supabase update review exception:', e);
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem(LOCAL_REVIEWS_KEY);
+    if (saved) {
+      try {
+        const list: SarangReview[] = JSON.parse(saved);
+        const updated = list.map((r) => (r.id === id ? { ...r, ...updates } : r));
+        localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(updated));
+      } catch {}
+    }
+  }
+
+  triggerRevalidation('/').catch(() => {});
 
   return true;
 }

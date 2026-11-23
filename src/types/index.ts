@@ -118,5 +118,6 @@ export interface SarangReview {
   reviewText: string;
   createdAt: string;
   isBenchmark?: boolean;
+  approved?: boolean;
 }
 

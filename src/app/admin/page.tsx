@@ -13,6 +13,8 @@ import {
   ContactMessageRecord,
   fetchSarangReviews,
   deleteSarangReview,
+  updateSarangReview,
+  triggerRevalidation,
   supabase
 } from '@/lib/supabaseClient';
 import { Project, ProjectCategory, ProjectStatus, PillarMode, SarangReview, normalizeProjectStatus } from '@/types';
@@ -28,7 +30,6 @@ import {
   Star
 } from 'lucide-react';
 import ProjectModal from '@/components/ProjectModal';
-import { BENCHMARK_EVALUATIONS } from '@/components/sections/SarangReviews';
 import AdminProjectsTab from '@/components/admin/AdminProjectsTab';
 import AdminInboxTab from '@/components/admin/AdminInboxTab';
 import AdminReviewsTab from '@/components/admin/AdminReviewsTab';
@@ -138,12 +139,7 @@ export default function AdminDashboardPage() {
       setMessages(loadedMessages);
 
       const loadedReviews = await fetchSarangReviews();
-      // Combine static creator benchmarks with live Supabase reviews for admin moderation
-      const allAdminReviews = [
-        ...BENCHMARK_EVALUATIONS.map(b => ({ ...b, isBenchmark: true, id: b.id || `benchmark-${Math.random()}` })),
-        ...loadedReviews
-      ];
-      setReviews(allAdminReviews);
+      setReviews(loadedReviews);
     } catch (e) {
       console.error('Error loading admin data:', e);
     } finally {
@@ -186,20 +182,26 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteReview = async (id: string) => {
-    const target = reviews.find((r) => r.id === id);
-    if (target?.isBenchmark) {
-      alert('Creator benchmark evaluations are protected baseline stress tests and cannot be deleted.');
-      return;
-    }
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     setIsDeletingReview(id);
     try {
       await deleteSarangReview(id);
       setReviews((prev) => prev.filter((r) => r.id !== id));
+      await triggerRevalidation('/');
     } catch (e) {
       console.error('Error deleting review:', e);
     } finally {
       setIsDeletingReview(null);
+    }
+  };
+
+  const handleApproveReview = async (id: string, approved: boolean) => {
+    try {
+      await updateSarangReview(id, { approved });
+      setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, approved } : r)));
+      await triggerRevalidation('/');
+    } catch (e) {
+      console.error('Error approving review:', e);
     }
   };
 
@@ -618,6 +620,7 @@ CREATE POLICY "Authenticated users manage contact messages" ON public.contact_me
             reviews={reviews}
             onDeleteReview={handleDeleteReview}
             isDeletingReview={isDeletingReview}
+            onApproveReview={handleApproveReview}
           />
         )}
 

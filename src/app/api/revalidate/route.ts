@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { timingSafeEqualString } from '@/lib/auth';
+import { timingSafeEqualString, ADMIN_COOKIE_NAME, getAdminSecret, verifySession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,14 +8,12 @@ export async function POST(req: NextRequest) {
   try {
     const configuredSecret = process.env.REVALIDATION_SECRET;
 
-    if (!configuredSecret || !configuredSecret.trim()) {
-      return NextResponse.json(
-        { revalidated: false, message: 'Unauthorized: Revalidation secret is not configured on the server.' },
-        { status: 401 }
-      );
-    }
+    // Check 1: Valid admin session cookie
+    const sessionCookie = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    const adminSecret = getAdminSecret();
+    const isSessionValid = sessionCookie && adminSecret ? (await verifySession(sessionCookie, adminSecret)).valid : false;
 
-    // Accept token via header 'x-revalidation-token' or 'Authorization: Bearer <token>'
+    // Check 2: Valid x-revalidation-token or Authorization Bearer token matching REVALIDATION_SECRET
     const customToken = req.headers.get('x-revalidation-token');
     const authHeader = req.headers.get('authorization');
     let providedToken = customToken ? customToken.trim() : null;
@@ -24,18 +22,13 @@ export async function POST(req: NextRequest) {
       providedToken = authHeader.slice(7).trim();
     }
 
-    if (!providedToken) {
-      return NextResponse.json(
-        { revalidated: false, message: 'Unauthorized: Missing revalidation token header.' },
-        { status: 401 }
-      );
-    }
+    const isSecretValid = (configuredSecret && providedToken)
+      ? await timingSafeEqualString(providedToken, configuredSecret.trim())
+      : false;
 
-    const isMatch = await timingSafeEqualString(providedToken, configuredSecret.trim());
-
-    if (!isMatch) {
+    if (!isSessionValid && !isSecretValid) {
       return NextResponse.json(
-        { revalidated: false, message: 'Unauthorized: Invalid revalidation token.' },
+        { revalidated: false, message: 'Unauthorized: Invalid or missing revalidation credentials.' },
         { status: 401 }
       );
     }
