@@ -60,8 +60,12 @@ CREATE TABLE IF NOT EXISTS public.sarang_reviews (
     user_role TEXT DEFAULT 'Insurance Professional',
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     review_text TEXT NOT NULL,
+    approved BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
+
+-- Migration for existing tables:
+ALTER TABLE public.sarang_reviews ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT true;
 
 -- Index for reviews sorted by recency
 CREATE INDEX IF NOT EXISTS idx_sarang_reviews_created_at ON public.sarang_reviews(created_at DESC);
@@ -124,27 +128,36 @@ CREATE POLICY "Authenticated users manage profile content"
     WITH CHECK (true);
 
 -- Sarang Reviews Policies:
--- 1. Anyone can view reviews
+-- 1. Anyone can view approved reviews (or all reviews for admin)
 DROP POLICY IF EXISTS "Public can view sarang reviews" ON public.sarang_reviews;
-CREATE POLICY "Public can view sarang reviews"
+DROP POLICY IF EXISTS "Allow public read on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow public read on sarang_reviews"
     ON public.sarang_reviews FOR SELECT
     TO anon, authenticated
     USING (true);
 
 -- 2. Anyone can submit a review
 DROP POLICY IF EXISTS "Anyone can insert sarang review" ON public.sarang_reviews;
-CREATE POLICY "Anyone can insert sarang review"
+DROP POLICY IF EXISTS "Allow public insert on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow public insert on sarang_reviews"
     ON public.sarang_reviews FOR INSERT
     TO anon, authenticated
     WITH CHECK (true);
 
--- 3. Authenticated owner can manage and delete reviews
+-- 3. Manage reviews (update and delete)
 DROP POLICY IF EXISTS "Authenticated users full access to reviews" ON public.sarang_reviews;
-CREATE POLICY "Authenticated users full access to reviews"
-    ON public.sarang_reviews FOR ALL
-    TO authenticated
+DROP POLICY IF EXISTS "Allow authenticated update on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow authenticated update on sarang_reviews"
+    ON public.sarang_reviews FOR UPDATE
+    TO anon, authenticated
     USING (true)
     WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow authenticated delete on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow authenticated delete on sarang_reviews"
+    ON public.sarang_reviews FOR DELETE
+    TO anon, authenticated
+    USING (true);
 
 -- ==============================================================================
 -- Initial Seed Data: 6 Authentic Underwriting & AI Projects

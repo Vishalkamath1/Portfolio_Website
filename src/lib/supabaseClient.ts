@@ -480,10 +480,12 @@ export async function saveSarangReview(review: Omit<SarangReview, 'id' | 'create
         }
       ]);
       if (error) {
-        console.warn('Supabase insert review error:', error);
+        console.error('Supabase insert review error:', error);
+        return { success: false, error: error.message || 'Database insert failed' };
       }
-    } catch (e) {
-      console.warn('Supabase insert review exception:', e);
+    } catch (e: any) {
+      console.error('Supabase insert review exception:', e);
+      return { success: false, error: e?.message || 'Database connection error' };
     }
   }
 
@@ -504,10 +506,12 @@ export async function deleteSarangReview(id: string): Promise<boolean> {
     try {
       const { error } = await supabase.from('sarang_reviews').delete().eq('id', id);
       if (error) {
-        console.warn('Supabase delete review error:', error);
+        console.error('Supabase delete review error:', error);
+        return false;
       }
     } catch (e) {
-      console.warn('Supabase delete review error:', e);
+      console.error('Supabase delete review error:', e);
+      return false;
     }
   }
 
@@ -535,10 +539,12 @@ export async function updateSarangReview(id: string, updates: Partial<SarangRevi
 
       const { error } = await supabase.from('sarang_reviews').update(dbUpdates).eq('id', id);
       if (error) {
-        console.warn('Supabase update review error:', error);
+        console.error('Supabase update review error:', error);
+        return false;
       }
     } catch (e) {
-      console.warn('Supabase update review exception:', e);
+      console.error('Supabase update review exception:', e);
+      return false;
     }
   }
 

@@ -354,8 +354,22 @@ CREATE TABLE IF NOT EXISTS public.contact_messages (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+CREATE TABLE IF NOT EXISTS public.sarang_reviews (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_name TEXT NOT NULL,
+    user_role TEXT DEFAULT 'Insurance Professional',
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL,
+    approved BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+-- Migration for existing sarang_reviews tables:
+ALTER TABLE public.sarang_reviews ADD COLUMN IF NOT EXISTS approved BOOLEAN NOT NULL DEFAULT true;
+
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sarang_reviews ENABLE ROW LEVEL SECURITY;
 
 -- Projects Policies
 DROP POLICY IF EXISTS "Public can view published projects" ON public.projects;
@@ -372,7 +386,20 @@ DROP POLICY IF EXISTS "Anyone can read contact messages" ON public.contact_messa
 CREATE POLICY "Anyone can read contact messages" ON public.contact_messages FOR SELECT TO anon, authenticated USING (true);
 
 DROP POLICY IF EXISTS "Authenticated users manage contact messages" ON public.contact_messages;
-CREATE POLICY "Authenticated users manage contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);`;
+CREATE POLICY "Authenticated users manage contact messages" ON public.contact_messages FOR ALL TO authenticated USING (true);
+
+-- Sarang Reviews Policies
+DROP POLICY IF EXISTS "Allow public read on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow public read on sarang_reviews" ON public.sarang_reviews FOR SELECT TO anon, authenticated USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow public insert on sarang_reviews" ON public.sarang_reviews FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow authenticated update on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow authenticated update on sarang_reviews" ON public.sarang_reviews FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow authenticated delete on sarang_reviews" ON public.sarang_reviews;
+CREATE POLICY "Allow authenticated delete on sarang_reviews" ON public.sarang_reviews FOR DELETE TO anon, authenticated USING (true);`;
 
     navigator.clipboard.writeText(sql);
     setCopiedSql(true);

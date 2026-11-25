@@ -35,6 +35,7 @@ export async function DELETE(req: NextRequest) {
     const { error } = await supabase.from('sarang_reviews').delete().eq('id', id);
     if (error) {
       console.warn('Supabase delete review error in API route:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
   }
 
@@ -65,6 +66,7 @@ export async function PATCH(req: NextRequest) {
       const { error } = await supabase.from('sarang_reviews').update(updates).eq('id', id);
       if (error) {
         console.warn('Supabase update review error in API route:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
       }
     }
 
